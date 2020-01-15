@@ -1,0 +1,15 @@
+usbd_cdc.c:470:17:USBD_CDC_Init	24	static
+usbd_cdc.c:548:17:USBD_CDC_DeInit	24	static
+usbd_cdc.c:582:17:USBD_CDC_Setup	32	static
+usbd_cdc.c:676:17:USBD_CDC_DataIn	24	static
+usbd_cdc.c:710:17:USBD_CDC_DataOut	24	static
+usbd_cdc.c:737:17:USBD_CDC_EP0_RxReady	24	static
+usbd_cdc.c:759:18:USBD_CDC_GetFSCfgDesc	16	static
+usbd_cdc.c:772:18:USBD_CDC_GetHSCfgDesc	16	static
+usbd_cdc.c:785:18:USBD_CDC_GetOtherSpeedCfgDesc	16	static
+usbd_cdc.c:797:11:USBD_CDC_GetDeviceQualifierDescriptor	16	static
+usbd_cdc.c:809:10:USBD_CDC_RegisterInterface	24	static
+usbd_cdc.c:829:10:USBD_CDC_SetTxBuffer	32	static
+usbd_cdc.c:848:10:USBD_CDC_SetRxBuffer	24	static
+usbd_cdc.c:864:10:USBD_CDC_TransmitPacket	24	static
+usbd_cdc.c:902:10:USBD_CDC_ReceivePacket	24	static

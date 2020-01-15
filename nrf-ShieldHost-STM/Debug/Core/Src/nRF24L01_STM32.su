@@ -1,0 +1,14 @@
+nRF24L01_STM32.c:48:6:nRF24L01_STM32	8	static
+nRF24L01_STM32.c:63:6:init	32	static
+nRF24L01_STM32.c:194:6:SPI_Write_Reg	24	static
+nRF24L01_STM32.c:210:6:SPI_Write_Buf_Reg	16	static
+nRF24L01_STM32.c:225:6:SPI_Write_Buf	16	static
+nRF24L01_STM32.c:238:6:SPI_Write	24	static
+nRF24L01_STM32.c:252:9:SPI_Read	24	static
+nRF24L01_STM32.c:264:9:SPI_Read_Status	24	static
+nRF24L01_STM32.c:281:9:SPI_Read_Reg	24	static
+nRF24L01_STM32.c:299:6:SPI_Read_Buf	16	static
+nRF24L01_STM32.c:312:6:SPI_Read_rx_buf	24	static
+nRF24L01_STM32.c:324:6:RX_Mode	16	static
+nRF24L01_STM32.c:360:6:RF_IRQ	32	static
+nRF24L01_STM32.c:396:6:TX_Mode_NOACK	24	static
