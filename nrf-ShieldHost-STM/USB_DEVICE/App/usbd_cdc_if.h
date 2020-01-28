@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under Ultimate Liberty license
@@ -91,9 +91,7 @@
 extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
-extern uint8_t rf_tx_buffer[];
-extern int rf_tx_buffer_count;
-extern uint8_t rx_newData;
+
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**
@@ -108,11 +106,7 @@ extern uint8_t rx_newData;
 uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
-//extern void get_Msg_fromHost(uint8_t* buf, uint16_t len);
 
-
-extern void HAL_GPIO_TogglePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);
-extern void HAL_Delay(uint32_t Delay);
 /* USER CODE END EXPORTED_FUNCTIONS */
 
 /**

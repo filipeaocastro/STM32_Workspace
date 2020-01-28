@@ -1,0 +1,33 @@
+/*
+ * led-rgb.c
+ *
+ *  Created on: Jan 16, 2020
+ *      Author: Filipe Augusto
+ */
+
+#include "led-rgb.h"
+
+void ligar(uint8_t cor)
+{
+	uint8_t RGB[3] = {0x04, 0x02, 0x01};
+	RGB[0] = RGB[0] & cor;
+	RGB[1] = RGB[1] & cor;
+	RGB[2] = RGB[2] & cor;
+
+	for(int i = 0; i < 3; i++)
+		if(RGB[i] != 0)
+			RGB[i] = 1;
+
+
+	HAL_GPIO_WritePin(GPIOB, LED_R_Pin, RGB[0]);
+	HAL_GPIO_WritePin(GPIOB, LED_G_Pin, RGB[1]);
+	HAL_GPIO_WritePin(GPIOB, LED_B_Pin, RGB[2]);
+
+}
+
+void apagar()
+{
+	HAL_GPIO_WritePin(GPIOB, LED_R_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, LED_G_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, LED_B_Pin, GPIO_PIN_RESET);
+}

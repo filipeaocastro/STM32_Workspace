@@ -55,12 +55,14 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
-void rx_task(void);
-uint8_t convert2ascii(uint8_t num);
-void printAscii(uint8_t byte);
-void get_Msg_fromHost(/*uint8_t* buf, uint16_t len*/);
+
 void rfSendBuffer(uint8_t *buffer2send, uint8_t buffer_size);
-void tx_task(void);
+void get_Msg_fromHost(void);	// Read messages from Host
+void tx_task(void);		// Verifies if there is any message from Host and send to MIP
+void rx_task(void);		// Receive message from MIP and send to Host
+
+uint8_t convert2ascii(uint8_t num);	// Test function
+void printAscii(uint8_t byte);		// Test function
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -68,7 +70,7 @@ void tx_task(void);
 uint8_t rx_buf[PAYLOAD_WIDTH];
 uint8_t rx_payloadWidth = 0;
 uint8_t rx_newPayload = 0;
-const char endMsgChar = '\0'; //Caracter finalizador de mensagens
+const char endMsgChar = '\0'; 		//Messages ending character (from Host)
 uint8_t rf_tx_buffer[NUM_CHARS] = {0};
 int rf_tx_buffer_count = 0;
 uint8_t rf_tx_SendMsg = 0;
@@ -113,7 +115,7 @@ int main(void)
   nRFint_guard = 0;		// Do not execute interruptions until the nRF initalization is complete
   rf_tx_buffer_count = 0;
   rf_tx_SendMsg = 0;
-  rfBridgeON = 0;   // Don't transfer data via RF until the Handshake HOST <-> STM is complete
+  rfBridgeON = 0;   	// Don't transfer data via RF until the Handshake HOST <-> STM is complete
 
   nRF24L01_STM32(hspi1); // Set the SPI parameters for the nRF library
 
@@ -121,6 +123,8 @@ int main(void)
   init(nRF_Canal, RF_DATA_RATE_1Mbps, RF_TX_POWER_0dBm);
   rx_newPayload = 0;
   nRFint_guard = 1; //liberar execução da interrupção externa
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -131,13 +135,15 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	  if(rx_newData > 0)	// rx_newData é alterado na função callback quando um novo dado chega pela serial (CDC_Receive_FS)
+	  if(rx_newData > 0)	// The rx_newData variable is modified in the callback function called when new data
+		  	  	  	  	  	//  comes through the serial port (CDC_Receive_FS)
 		  get_Msg_fromHost();
 
-	  tx_task();	//Se existir mensagem (corretamente lida em get_Msg_fromHost()), a envia para o MIP (via RF)
+	  tx_task();	// If there is message from the Host, read correctly by get_Msg_fromHost(), it's
+	  	  	  	  	//  sent to the MIP via RF
 
-	  rx_task();  	//Verifica se chegou algum pacote do MIP (via RF).
-	              	  //Se existir mensagem (corretamente lida em rx_task()), a envia para oHOST via porta COM.
+	  rx_task();  	// Verifies if package arrived from the MIP (via RF) and send it to the Host via COM port.
+
 
   }
   /* USER CODE END 3 */
@@ -296,6 +302,7 @@ void rx_task()
     //(O MIP enviou um pacote para o HOST).
     if (rx_newPayload > 0)  //newPayload setada em IRQ de chegada de novo pacote (RX)
     {
+
         rx_newPayload = 0; //sdinalizar payload recebida
 
         if(rx_payloadWidth > 0) //Se a interrupção foi gerado por algum ruído etc, não teremos dados no payload
@@ -304,48 +311,21 @@ void rx_task()
 
         	CDC_Transmit_FS(rx_buf, rx_payloadWidth);
         	HAL_Delay(5);
-
         }
+
     }
 }
 
-uint8_t convert2ascii(uint8_t num)
-{
-	if(num <= 0x09)
-	{
-		num = num + 0x30;
-	}
-	else
-	{
-		num = num + 0x37;
-	}
-	return num;
-}
-void printAscii(uint8_t byte)
-{
-	uint8_t sta[3];
-  sta[0] = ((byte & 0xF0) >> 4); //MSB
-  sta[0] = convert2ascii(sta[0]);
-  sta[1] = (byte & 0x0F);
-  sta[1] = convert2ascii(sta[1]);//LSB
-  sta[2] = '\n';
-
-  CDC_Transmit_FS(sta, 3);
-  HAL_Delay(10);
-}
-
 /**
- * Esssa função verifica se o STM já fez o handshake com o Host.
- * Caso ele já tenha ocorrido, ela ativa a flag (rf_tx_SendMsg) que permite o redirecionamento das
- * mensagens que chegam ao RF para o Host. Caso o handshake não tenha ocorrido, ele é feito aqui.
- * Lê uma mensagem do HOST (terminada com '\0') via port COM e coloca no Buffer para transmissão RF para o MIP.
  *
- * Essa função é chamada toda vez que um dado chega na porta serial através da função de callback do STM
- *
- * @param buf Buffer de dados que chegou na porta serial
- * @param len Quantidade de bytes que chegaram
+ * This function is called everytime an amount of data arrives at the serial port by the activation of the
+ * rx_newData, which is made by the callback function CDC_Receive_FS.
+ * This function verifies if the handshake between the STM and de Host (PC) is already been done. Otherwise,
+ * it is done in this function and it activates the rx_tx_SendMsg flag that allows redirectioning the messages from
+ * the nRF to the Host. If the handshake its already been done, it reads the message from the host (ended with '\0')
+ * via COM port and puts it in the RF transmission buffer to the MIP.
  */
-void get_Msg_fromHost(/*uint8_t* buf, uint16_t len*/)
+void get_Msg_fromHost()
 {
     int i, rc;
 
@@ -404,6 +384,7 @@ void get_Msg_fromHost(/*uint8_t* buf, uint16_t len*/)
                   //Ecoar para o Host
 
                 	CDC_Transmit_FS(rf_tx_buffer, rf_tx_buffer_count);
+                	HAL_Delay(5);
 
                   rfBridgeON = 1; //De agora em diante, todos os bytes recebidos do Host serão enviados ao MIP por RF.
                 }
@@ -415,6 +396,9 @@ void get_Msg_fromHost(/*uint8_t* buf, uint16_t len*/)
     }
 }
 
+/**
+ * Verifies if there is a message to be transmitted to the MIP via RF and sends it in packages of 32 bytes or less
+ */
 void tx_task()
 {
   uint8_t data_size, index_atual;
@@ -423,7 +407,6 @@ void tx_task()
   //Existe mensagem para ser enviada para o MIP via RF?
   if ((rfBridgeON == 0) || (rf_tx_SendMsg == 0))
     return;
-
   data_size = rf_tx_buffer_count;
   rf_tx_buffer_count = 0;
 
@@ -450,9 +433,17 @@ void tx_task()
 
   //Sinalizar mensagem transmitida
   rf_tx_SendMsg = 0;
-
 }
+
+
 //Transmitir um pacote de até 32 bytes pela RF para o MIP
+
+/**
+ * Sends the buffer to be transmitted to the transmission function
+ *
+ * @param buffer2send	Buffer to be sent to the MIP via RF
+ * @param buffer_size	Size of buffer to be sent to the MIP via RF
+ */
 void rfSendBuffer(uint8_t *buffer2send, uint8_t buffer_size)
 {
   uint8_t send_index = 0;
@@ -466,6 +457,32 @@ void rfSendBuffer(uint8_t *buffer2send, uint8_t buffer_size)
   TX_Mode_NOACK(tx_buf, send_index);
 }
 
+/********** TEST FUNCTIONS **********/
+
+uint8_t convert2ascii(uint8_t num)
+{
+	if(num <= 0x09)
+	{
+		num = num + 0x30;
+	}
+	else
+	{
+		num = num + 0x37;
+	}
+	return num;
+}
+void printAscii(uint8_t byte)
+{
+	uint8_t sta[3];
+  sta[0] = ((byte & 0xF0) >> 4); //MSB
+  sta[0] = convert2ascii(sta[0]);
+  sta[1] = (byte & 0x0F);
+  sta[1] = convert2ascii(sta[1]);//LSB
+  sta[2] = '\n';
+
+  CDC_Transmit_FS(sta, 3);
+  HAL_Delay(10);
+}
 
 /* USER CODE END 4 */
 

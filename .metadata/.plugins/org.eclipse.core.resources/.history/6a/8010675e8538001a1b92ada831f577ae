@@ -1,0 +1,33 @@
+/*
+ * led-rgb.h
+ *
+ *  Created on: Jan 16, 2020
+ *      Author: Filipe Augusto
+ */
+
+#ifndef INC_LED_RGB_H_
+#define INC_LED_RGB_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "stm32f1xx_hal.h"
+
+#define AZUL 	 0x1
+#define VERDE 	 0x2
+#define CIANO 	 0x3
+#define VERMELHO 0x4
+#define ROSA 	 0x5
+#define AMARELO  0x6
+#define BRANCO 	 0x7
+
+
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* INC_LED_RGB_H_ */

@@ -1,14 +1,23 @@
-14:56:57 **** Incremental Build of configuration Debug for project nrf-ShieldHost-STM ****
+15:51:13 **** Incremental Build of configuration Debug for project nrf-ShieldHost-STM-LED ****
 make -j4 all 
-arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F103xB -DDEBUG -c -I../USB_DEVICE/Target -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../USB_DEVICE/App -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
+arm-none-eabi-gcc "../Core/Src/led-rgb.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F103xB -DDEBUG -c -I../USB_DEVICE/Target -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../USB_DEVICE/App -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/led-rgb.d" -MT"Core/Src/led-rgb.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/led-rgb.o"
+arm-none-eabi-gcc "../Core/Src/stm32f1xx_hal_msp.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F103xB -DDEBUG -c -I../USB_DEVICE/Target -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../USB_DEVICE/App -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/stm32f1xx_hal_msp.d" -MT"Core/Src/stm32f1xx_hal_msp.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/stm32f1xx_hal_msp.o"
+arm-none-eabi-gcc "../Core/Src/stm32f1xx_it.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F103xB -DDEBUG -c -I../USB_DEVICE/Target -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../USB_DEVICE/App -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/stm32f1xx_it.d" -MT"Core/Src/stm32f1xx_it.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/stm32f1xx_it.o"
+arm-none-eabi-gcc "../Core/Src/system_stm32f1xx.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F103xB -DDEBUG -c -I../USB_DEVICE/Target -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../USB_DEVICE/App -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/system_stm32f1xx.d" -MT"Core/Src/system_stm32f1xx.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/system_stm32f1xx.o"
 In file included from ../Core/Inc/main.h:35:0,
-                 from ../Core/Src/main.c:22:
+                 from ../Core/Src/stm32f1xx_hal_msp.c:23:
 ../Core/Inc/nRF24L01_STM32.h:106:13: warning: 'SPI_Write' declared 'static' but never defined [-Wunused-function]
  static void SPI_Write(uint8_t command, uint8_t * value);
              ^~~~~~~~~
 ../Core/Inc/nRF24L01_STM32.h:110:16: warning: 'SPI_Read_Reg' declared 'static' but never defined [-Wunused-function]
  static uint8_t SPI_Read_Reg(uint8_t reg);
                 ^~~~~~~~~~~~
+In file included from ../Core/Src/stm32f1xx_hal_msp.c:23:0:
+../Core/Inc/main.h:47:16: warning: 'nRFint_guard' defined but not used [-Wunused-variable]
+ uint8_t static nRFint_guard = 0; //não executar ainda interrupções que porventura cheguem em nRF_pinIRQ
+                ^~~~~~~~~~~~
+In file included from ../Core/Inc/main.h:35:0,
+                 from ../Core/Src/stm32f1xx_hal_msp.c:23:
 ../Core/Inc/nRF24L01_STM32.h:103:16: warning: 'RX_OK' defined but not used [-Wunused-variable]
  static uint8_t RX_OK = 0;  //Indicar MODO RX ativo (1) ou Inativo (0)
                 ^~~~~
@@ -18,20 +27,52 @@ In file included from ../Core/Inc/main.h:35:0,
 ../Core/Inc/nRF24L01_STM32.h:101:16: warning: 'status' defined but not used [-Wunused-variable]
  static uint8_t status;     // Contains the STATUS register reading
                 ^~~~~~
+../Core/Inc/nRF24L01_STM32.h:98:16: warning: 'tx_buf' defined but not used [-Wunused-variable]
+ static uint8_t tx_buf[PAYLOAD_WIDTH];
+                ^~~~~~
 ../Core/Inc/nRF24L01_STM32.h:95:16: warning: 'ADDR_HOST' defined but not used [-Wunused-variable]
  static uint8_t ADDR_HOST[TX_RX_ADDR_WIDTH] =  {0xE7,0xE7,0xE7,0xE7,0xE7};   // Define a static host adr
                 ^~~~~~~~~
-arm-none-eabi-gcc -o "nrf-ShieldHost-STM.elf" @"objects.list"   -mcpu=cortex-m3 -T"C:\Users\Filipe Augusto\STM32CubeIDE\workspace_1.1.0\nrf-ShieldHost-STM\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="nrf-ShieldHost-STM.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: nrf-ShieldHost-STM.elf
+In file included from ../Core/Inc/main.h:35:0,
+                 from ../Core/Src/stm32f1xx_it.c:22:
+../Core/Inc/nRF24L01_STM32.h:106:13: warning: 'SPI_Write' declared 'static' but never defined [-Wunused-function]
+ static void SPI_Write(uint8_t command, uint8_t * value);
+             ^~~~~~~~~
+../Core/Inc/nRF24L01_STM32.h:110:16: warning: 'SPI_Read_Reg' declared 'static' but never defined [-Wunused-function]
+ static uint8_t SPI_Read_Reg(uint8_t reg);
+                ^~~~~~~~~~~~
+In file included from ../Core/Src/stm32f1xx_it.c:22:0:
+../Core/Inc/main.h:47:16: warning: 'nRFint_guard' defined but not used [-Wunused-variable]
+ uint8_t static nRFint_guard = 0; //não executar ainda interrupções que porventura cheguem em nRF_pinIRQ
+                ^~~~~~~~~~~~
+In file included from ../Core/Inc/main.h:35:0,
+                 from ../Core/Src/stm32f1xx_it.c:22:
+../Core/Inc/nRF24L01_STM32.h:103:16: warning: 'RX_OK' defined but not used [-Wunused-variable]
+ static uint8_t RX_OK = 0;  //Indicar MODO RX ativo (1) ou Inativo (0)
+                ^~~~~
+../Core/Inc/nRF24L01_STM32.h:102:16: warning: 'TX_OK' defined but not used [-Wunused-variable]
+ static uint8_t TX_OK = 0;  //Indicar MODO TX ativo (1) ou Inativo (0)
+                ^~~~~
+../Core/Inc/nRF24L01_STM32.h:101:16: warning: 'status' defined but not used [-Wunused-variable]
+ static uint8_t status;     // Contains the STATUS register reading
+                ^~~~~~
+../Core/Inc/nRF24L01_STM32.h:98:16: warning: 'tx_buf' defined but not used [-Wunused-variable]
+ static uint8_t tx_buf[PAYLOAD_WIDTH];
+                ^~~~~~
+../Core/Inc/nRF24L01_STM32.h:95:16: warning: 'ADDR_HOST' defined but not used [-Wunused-variable]
+ static uint8_t ADDR_HOST[TX_RX_ADDR_WIDTH] =  {0xE7,0xE7,0xE7,0xE7,0xE7};   // Define a static host adr
+                ^~~~~~~~~
+arm-none-eabi-gcc -o "nrf-ShieldHost-STM-LED.elf" @"objects.list"   -mcpu=cortex-m3 -T"C:\Users\Filipe Augusto\STM32CubeIDE\workspace_1.1.0\nrf-ShieldHost-STM-LED\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="nrf-ShieldHost-STM-LED.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: nrf-ShieldHost-STM-LED.elf
  
-arm-none-eabi-objdump -h -S  nrf-ShieldHost-STM.elf  > "nrf-ShieldHost-STM.list"
-arm-none-eabi-objcopy  -O ihex  nrf-ShieldHost-STM.elf  "nrf-ShieldHost-STM.hex"
-arm-none-eabi-size   nrf-ShieldHost-STM.elf 
+arm-none-eabi-size   nrf-ShieldHost-STM-LED.elf 
+arm-none-eabi-objdump -h -S  nrf-ShieldHost-STM-LED.elf  > "nrf-ShieldHost-STM-LED.list"
+arm-none-eabi-objcopy  -O ihex  nrf-ShieldHost-STM-LED.elf  "nrf-ShieldHost-STM-LED.hex"
    text	   data	    bss	    dec	    hex	filename
-  26928	    396	   4980	  32304	   7e30	nrf-ShieldHost-STM.elf
+  27176	    396	   4980	  32552	   7f28	nrf-ShieldHost-STM-LED.elf
 Finished building: default.size.stdout
  
-Finished building: nrf-ShieldHost-STM.hex
+Finished building: nrf-ShieldHost-STM-LED.hex
  
-Finished building: nrf-ShieldHost-STM.list
+Finished building: nrf-ShieldHost-STM-LED.list
  
