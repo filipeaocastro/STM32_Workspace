@@ -91,7 +91,9 @@
 extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
-
+extern uint8_t rf_tx_buffer[];
+extern int rf_tx_buffer_count;
+extern uint8_t rx_newData;
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**
@@ -106,7 +108,7 @@ extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
 uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
-
+extern void HAL_GPIO_TogglePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);
 /* USER CODE END EXPORTED_FUNCTIONS */
 
 /**

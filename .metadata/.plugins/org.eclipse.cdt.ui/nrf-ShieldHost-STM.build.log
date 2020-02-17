@@ -1,7 +1,43 @@
-14:39:22 **** Incremental Build of configuration Debug for project nrf-ShieldHost-STM ****
+15:51:18 **** Incremental Build of configuration Debug for project nrf-ShieldHost-STM ****
 make -j4 all 
-arm-none-eabi-gcc "../USB_DEVICE/App/usbd_cdc_if.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F103xB -DDEBUG -c -I../USB_DEVICE/Target -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../USB_DEVICE/App -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"USB_DEVICE/App/usbd_cdc_if.d" -MT"USB_DEVICE/App/usbd_cdc_if.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "USB_DEVICE/App/usbd_cdc_if.o"
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F103xB -DDEBUG -c -I../USB_DEVICE/Target -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../USB_DEVICE/App -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
+arm-none-eabi-gcc "../Core/Src/nRF24L01_STM32.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F103xB -DDEBUG -c -I../USB_DEVICE/Target -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc -I../USB_DEVICE/App -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/nRF24L01_STM32.d" -MT"Core/Src/nRF24L01_STM32.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/nRF24L01_STM32.o"
+../Core/Src/nRF24L01_STM32.c: In function 'init':
+../Core/Src/nRF24L01_STM32.c:138:9: warning: enumeration value 'RF_DATA_RATE_250kbps' not handled in switch [-Wswitch]
+         switch (rf_data_rate)
+         ^~~~~~
+../Core/Src/nRF24L01_STM32.c:153:32: warning: passing argument 2 of 'SPI_Write_Buf_Reg' from incompatible pointer type [-Wincompatible-pointer-types]
+     SPI_Write_Buf_Reg(TX_ADDR, &ADDR_HOST, TX_RX_ADDR_WIDTH);
+                                ^
+In file included from ../Core/Src/nRF24L01_STM32.c:1:0:
+../Core/Inc/nRF24L01_STM32.h:112:6: note: expected 'uint8_t * {aka unsigned char *}' but argument is of type 'uint8_t (*)[5] {aka unsigned char (*)[5]}'
+ void SPI_Write_Buf_Reg(uint8_t reg, uint8_t *value, uint16_t size);
+      ^~~~~~~~~~~~~~~~~
+../Core/Src/nRF24L01_STM32.c:155:35: warning: passing argument 2 of 'SPI_Write_Buf_Reg' from incompatible pointer type [-Wincompatible-pointer-types]
+     SPI_Write_Buf_Reg(RX_ADDR_P0, &ADDR_HOST, TX_RX_ADDR_WIDTH);
+                                   ^
+In file included from ../Core/Src/nRF24L01_STM32.c:1:0:
+../Core/Inc/nRF24L01_STM32.h:112:6: note: expected 'uint8_t * {aka unsigned char *}' but argument is of type 'uint8_t (*)[5] {aka unsigned char (*)[5]}'
+ void SPI_Write_Buf_Reg(uint8_t reg, uint8_t *value, uint16_t size);
+      ^~~~~~~~~~~~~~~~~
+../Core/Src/nRF24L01_STM32.c: In function 'TX_Mode_NOACK':
+../Core/Src/nRF24L01_STM32.c:425:34: warning: passing argument 2 of 'SPI_Write_Buf_Reg' from incompatible pointer type [-Wincompatible-pointer-types]
+    SPI_Write_Buf_Reg(RX_ADDR_P0, &ADDR_HOST, TX_RX_ADDR_WIDTH);
+                                  ^
+../Core/Src/nRF24L01_STM32.c:200:6: note: expected 'uint8_t * {aka unsigned char *}' but argument is of type 'uint8_t (*)[5] {aka unsigned char (*)[5]}'
+ void SPI_Write_Buf_Reg(uint8_t reg, uint8_t *value, uint16_t size)
+      ^~~~~~~~~~~~~~~~~
+../Core/Src/nRF24L01_STM32.c:398:12: warning: unused variable 'statusReg' [-Wunused-variable]
+    uint8_t statusReg;
+            ^~~~~~~~~
+At top level:
+../Core/Src/nRF24L01_STM32.c:276:9: warning: 'SPI_Read_Reg' defined but not used [-Wunused-function]
+ uint8_t SPI_Read_Reg(uint8_t reg)
+         ^~~~~~~~~~~~
+In file included from ../Core/Src/nRF24L01_STM32.c:1:0:
+../Core/Inc/nRF24L01_STM32.h:98:16: warning: 'tx_buf' defined but not used [-Wunused-variable]
+ static uint8_t tx_buf[PAYLOAD_WIDTH];
+                ^~~~~~
 In file included from ../Core/Inc/main.h:35:0,
                  from ../Core/Src/main.c:22:
 ../Core/Inc/nRF24L01_STM32.h:106:13: warning: 'SPI_Write' declared 'static' but never defined [-Wunused-function]
@@ -22,50 +58,6 @@ In file included from ../Core/Inc/main.h:35:0,
 ../Core/Inc/nRF24L01_STM32.h:95:16: warning: 'ADDR_HOST' defined but not used [-Wunused-variable]
  static uint8_t ADDR_HOST[TX_RX_ADDR_WIDTH] =  {0xE7,0xE7,0xE7,0xE7,0xE7};   // Define a static host adr
                 ^~~~~~~~~
-In file included from ../Core/Inc/main.h:35:0,
-                 from ../USB_DEVICE/Target/usbd_conf.h:34,
-                 from ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h:29,
-                 from ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:29,
-                 from ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h:29,
-                 from ../USB_DEVICE/App/usbd_cdc_if.h:31,
-                 from ../USB_DEVICE/App/usbd_cdc_if.c:23:
-../Core/Inc/nRF24L01_STM32.h:106:13: warning: 'SPI_Write' declared 'static' but never defined [-Wunused-function]
- static void SPI_Write(uint8_t command, uint8_t * value);
-             ^~~~~~~~~
-../Core/Inc/nRF24L01_STM32.h:110:16: warning: 'SPI_Read_Reg' declared 'static' but never defined [-Wunused-function]
- static uint8_t SPI_Read_Reg(uint8_t reg);
-                ^~~~~~~~~~~~
-In file included from ../USB_DEVICE/Target/usbd_conf.h:34:0,
-                 from ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h:29,
-                 from ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:29,
-                 from ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h:29,
-                 from ../USB_DEVICE/App/usbd_cdc_if.h:31,
-                 from ../USB_DEVICE/App/usbd_cdc_if.c:23:
-../Core/Inc/main.h:46:16: warning: 'nRFint_guard' defined but not used [-Wunused-variable]
- uint8_t static nRFint_guard = 0; //não executar ainda interrupções que porventura cheguem em nRF_pinIRQ
-                ^~~~~~~~~~~~
-In file included from ../Core/Inc/main.h:35:0,
-                 from ../USB_DEVICE/Target/usbd_conf.h:34,
-                 from ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h:29,
-                 from ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:29,
-                 from ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h:29,
-                 from ../USB_DEVICE/App/usbd_cdc_if.h:31,
-                 from ../USB_DEVICE/App/usbd_cdc_if.c:23:
-../Core/Inc/nRF24L01_STM32.h:103:16: warning: 'RX_OK' defined but not used [-Wunused-variable]
- static uint8_t RX_OK = 0;  //Indicar MODO RX ativo (1) ou Inativo (0)
-                ^~~~~
-../Core/Inc/nRF24L01_STM32.h:102:16: warning: 'TX_OK' defined but not used [-Wunused-variable]
- static uint8_t TX_OK = 0;  //Indicar MODO TX ativo (1) ou Inativo (0)
-                ^~~~~
-../Core/Inc/nRF24L01_STM32.h:101:16: warning: 'status' defined but not used [-Wunused-variable]
- static uint8_t status;     // Contains the STATUS register reading
-                ^~~~~~
-../Core/Inc/nRF24L01_STM32.h:98:16: warning: 'tx_buf' defined but not used [-Wunused-variable]
- static uint8_t tx_buf[PAYLOAD_WIDTH];
-                ^~~~~~
-../Core/Inc/nRF24L01_STM32.h:95:16: warning: 'ADDR_HOST' defined but not used [-Wunused-variable]
- static uint8_t ADDR_HOST[TX_RX_ADDR_WIDTH] =  {0xE7,0xE7,0xE7,0xE7,0xE7};   // Define a static host adr
-                ^~~~~~~~~
 arm-none-eabi-gcc -o "nrf-ShieldHost-STM.elf" @"objects.list"   -mcpu=cortex-m3 -T"C:\Users\Filipe Augusto\STM32CubeIDE\workspace_1.1.0\nrf-ShieldHost-STM\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="nrf-ShieldHost-STM.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 Finished building target: nrf-ShieldHost-STM.elf
  
@@ -73,7 +65,7 @@ arm-none-eabi-objdump -h -S  nrf-ShieldHost-STM.elf  > "nrf-ShieldHost-STM.list"
 arm-none-eabi-objcopy  -O ihex  nrf-ShieldHost-STM.elf  "nrf-ShieldHost-STM.hex"
 arm-none-eabi-size   nrf-ShieldHost-STM.elf 
    text	   data	    bss	    dec	    hex	filename
-  26932	    396	   4980	  32308	   7e34	nrf-ShieldHost-STM.elf
+  26916	    396	   6468	  33780	   83f4	nrf-ShieldHost-STM.elf
 Finished building: default.size.stdout
  
 Finished building: nrf-ShieldHost-STM.hex
@@ -81,5 +73,5 @@ Finished building: nrf-ShieldHost-STM.hex
 Finished building: nrf-ShieldHost-STM.list
  
 
-14:39:26 Build Finished. 0 errors, 14 warnings. (took 3s.814ms)
+15:51:23 Build Finished. 0 errors, 13 warnings. (took 5s.420ms)
 

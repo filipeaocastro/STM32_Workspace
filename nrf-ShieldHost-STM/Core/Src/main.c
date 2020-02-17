@@ -329,10 +329,7 @@ void get_Msg_fromHost()
 {
     int i, rc;
 
-    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-
     rx_newData = 0;
-
 
     //Se não estiver enviando mensagem do Buffer TX para o HOST:
     if (rf_tx_SendMsg == 0)
@@ -379,7 +376,7 @@ void get_Msg_fromHost()
                     rf_tx_buffer_count = 4;
                 }
                 //A mensagem é "RDY\0" ?
-                if(rf_tx_buffer[0] == 'R' && rf_tx_buffer[1] == 'D' && rf_tx_buffer[2] == 'Y')
+                if( (rf_tx_buffer[0] == 'R') && (rf_tx_buffer[1] == 'D') && (rf_tx_buffer[2] == 'Y') )
                 {
                   //Ecoar para o Host
 
@@ -387,6 +384,7 @@ void get_Msg_fromHost()
                 	HAL_Delay(5);
 
                   rfBridgeON = 1; //De agora em diante, todos os bytes recebidos do Host serão enviados ao MIP por RF.
+                  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
                 }
                 //Caso a mensagem tenha sido enviada para o Host (acima) ou não (deve ser ignorada):
                 rf_tx_buffer_count = 0; //reiniciar leitura de novas mensagens;

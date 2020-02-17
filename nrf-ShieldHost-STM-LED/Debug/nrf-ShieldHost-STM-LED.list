@@ -29,21 +29,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  12 .debug_info   000160a1  00000000  00000000  000201ad  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_abbrev 0000315e  00000000  00000000  0003624e  2**0
+ 13 .debug_abbrev 00003146  00000000  00000000  0003624e  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_aranges 00000d38  00000000  00000000  000393b0  2**3
+ 14 .debug_aranges 00000d38  00000000  00000000  00039398  2**3
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_ranges 00000bc0  00000000  00000000  0003a0e8  2**3
+ 15 .debug_ranges 00000bc0  00000000  00000000  0003a0d0  2**3
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_macro  00016dd9  00000000  00000000  0003aca8  2**0
+ 16 .debug_macro  00016dd9  00000000  00000000  0003ac90  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   0000da56  00000000  00000000  00051a81  2**0
+ 17 .debug_line   0000da56  00000000  00000000  00051a69  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    0006f738  00000000  00000000  0005f4d7  2**0
+ 18 .debug_str    0006f738  00000000  00000000  0005f4bf  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  000cec0f  2**0
+ 19 .comment      0000007b  00000000  00000000  000cebf7  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000033e4  00000000  00000000  000cec8c  2**2
+ 20 .debug_frame  000033e4  00000000  00000000  000cec74  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -203,8 +203,12 @@ int main(void)
  80001fe:	f000 f89d 	bl	800033c <MX_SPI1_Init>
   MX_USB_DEVICE_Init();
  8000202:	f005 feed 	bl	8005fe0 <MX_USB_DEVICE_Init>
+
+
   /* USER CODE BEGIN 2 */
-  ligar(AMARELO);
+
+
+  ligar(AMARELO);		// Turns the led yellow
  8000206:	2006      	movs	r0, #6
  8000208:	f7ff ffa0 	bl	800014c <ligar>
   nRFint_guard = 0;		// Do not execute interruptions until the nRF initalization is complete
@@ -219,7 +223,7 @@ int main(void)
  8000218:	4b15      	ldr	r3, [pc, #84]	; (8000270 <main+0x84>)
  800021a:	2200      	movs	r2, #0
  800021c:	701a      	strb	r2, [r3, #0]
-  rfBridgeON = 0;   // Don't transfer data via RF until the Handshake HOST <-> STM is complete
+  rfBridgeON = 0;   	// Don't transfer data via RF until the Handshake HOST <-> STM is complete
  800021e:	4b15      	ldr	r3, [pc, #84]	; (8000274 <main+0x88>)
  8000220:	2200      	movs	r2, #0
  8000222:	701a      	strb	r2, [r3, #0]
@@ -253,20 +257,22 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	  if(rx_newData > 0)	// rx_newData é alterado na função callback quando um novo dado chega pela serial (CDC_Receive_FS)
+	  if(rx_newData > 0)	// The rx_newData variable is modified in the callback function called when new data
  8000252:	4b0b      	ldr	r3, [pc, #44]	; (8000280 <main+0x94>)
  8000254:	781b      	ldrb	r3, [r3, #0]
  8000256:	2b00      	cmp	r3, #0
  8000258:	d001      	beq.n	800025e <main+0x72>
+		  	  	  	  	  	//  comes through the serial port (CDC_Receive_FS)
 		  get_Msg_fromHost();
  800025a:	f000 f983 	bl	8000564 <get_Msg_fromHost>
 
-	  tx_task();	//Se existir mensagem (corretamente lida em get_Msg_fromHost()), a envia para o MIP (via RF)
+	  tx_task();	// If there is message from the Host, read correctly by get_Msg_fromHost(), it's
  800025e:	f000 f9f1 	bl	8000644 <tx_task>
+	  	  	  	  	//  sent to the MIP via RF
 
-	  rx_task();  	//Verifica se chegou algum pacote do MIP (via RF).
+	  rx_task();  	// Verifies if package arrived from the MIP (via RF) and send it to the Host via COM port.
  8000262:	f000 f959 	bl	8000518 <rx_task>
-	  if(rx_newData > 0)	// rx_newData é alterado na função callback quando um novo dado chega pela serial (CDC_Receive_FS)
+	  if(rx_newData > 0)	// The rx_newData variable is modified in the callback function called when new data
  8000266:	e7f4      	b.n	8000252 <main+0x66>
  8000268:	200001c0 	.word	0x200001c0
  800026c:	200002c4 	.word	0x200002c4
@@ -758,11 +764,11 @@ void rx_task()
  8000560:	20000548 	.word	0x20000548
 
 08000564 <get_Msg_fromHost>:
- *
- * @param buf Buffer de dados que chegou na porta serial
- * @param len Quantidade de bytes que chegaram
+ * it is done in this function and it activates the rx_tx_SendMsg flag that allows redirectioning the messages from
+ * the nRF to the Host. If the handshake its already been done, it reads the message from the host (ended with '\0')
+ * via COM port and puts it in the RF transmission buffer to the MIP.
  */
-void get_Msg_fromHost(/*uint8_t* buf, uint16_t len*/)
+void get_Msg_fromHost()
 {
  8000564:	b580      	push	{r7, lr}
  8000566:	b082      	sub	sp, #8
@@ -929,6 +935,9 @@ void get_Msg_fromHost(/*uint8_t* buf, uint16_t len*/)
 
 08000644 <tx_task>:
 
+/**
+ * Verifies if there is a message to be transmitted to the MIP via RF and sends it in packages of 32 bytes or less
+ */
 void tx_task()
 {
  8000644:	b580      	push	{r7, lr}
@@ -1040,7 +1049,10 @@ void tx_task()
  80006e0:	200001c4 	.word	0x200001c4
 
 080006e4 <rfSendBuffer>:
-//Transmitir um pacote de até 32 bytes pela RF para o MIP
+ *
+ * @param buffer2send	Buffer to be sent to the MIP via RF
+ * @param buffer_size	Size of buffer to be sent to the MIP via RF
+ */
 void rfSendBuffer(uint8_t *buffer2send, uint8_t buffer_size)
 {
  80006e4:	b580      	push	{r7, lr}
@@ -1116,8 +1128,8 @@ void Error_Handler(void)
 
 08000744 <nRF24L01_STM32>:
 /**
- * Construtor usando pinos default
- * @param spi
+ * Construtor using the default pins
+ * @param spi its an SPI_HandleTypeDef object that contains the SPI informations
  **/
 void nRF24L01_STM32(SPI_HandleTypeDef spi)
 {
@@ -1143,8 +1155,8 @@ void nRF24L01_STM32(SPI_HandleTypeDef spi)
  8000770:	200004f0 	.word	0x200004f0
 
 08000774 <init>:
- * @param rf_data_rate
- * @param rf_pwr
+ * @param rf_data_rate	The radio's data rate in Mbps
+ * @param rf_pwr		The radio's power in dB
  */
 
 void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
@@ -1259,7 +1271,6 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
  8000804:	4619      	mov	r1, r3
  8000806:	2005      	movs	r0, #5
  8000808:	f000 f888 	bl	800091c <SPI_Write_Reg>
-    /************************* CONTINUA DAQUI *************************/
 
     //RF SETUP
     //Ajustar potência de saída em modo TX (bits 2:1)
@@ -1365,10 +1376,8 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
  80008a4:	4619      	mov	r1, r3
  80008a6:	2006      	movs	r0, #6
  80008a8:	f000 f838 	bl	800091c <SPI_Write_Reg>
-    uint8_t addr_host[TX_RX_ADDR_WIDTH] = {0};
-    for(int i = 0; i < TX_RX_ADDR_WIDTH; i++)
-    	addr_host[i] = ADDR_HOST[i];
-    	*/
+
+
     //Transmiter Address.
     SPI_Write_Buf_Reg(TX_ADDR, &ADDR_HOST, TX_RX_ADDR_WIDTH);
  80008ac:	2205      	movs	r2, #5
@@ -1646,13 +1655,13 @@ uint8_t SPI_Read(uint8_t command)
  8000a7c:	2110      	movs	r1, #16
  8000a7e:	480e      	ldr	r0, [pc, #56]	; (8000ab8 <SPI_Read+0x4c>)
  8000a80:	f000 fd14 	bl	80014ac <HAL_GPIO_WritePin>
-    HAL_SPI_Transmit(&_spi, &command, sizeof(command), HAL_MAX_DELAY); 
+    HAL_SPI_Transmit(&_spi, &command, sizeof(command), HAL_MAX_DELAY); 	  // Transmits the command
  8000a84:	1df9      	adds	r1, r7, #7
  8000a86:	f04f 33ff 	mov.w	r3, #4294967295
  8000a8a:	2201      	movs	r2, #1
  8000a8c:	480b      	ldr	r0, [pc, #44]	; (8000abc <SPI_Read+0x50>)
  8000a8e:	f002 f938 	bl	8002d02 <HAL_SPI_Transmit>
-    HAL_SPI_Receive (&_spi, &reading, sizeof(command), HAL_MAX_DELAY);
+    HAL_SPI_Receive (&_spi, &reading, sizeof(command), HAL_MAX_DELAY);	  // Saves the response in 'reading'
  8000a92:	f107 010f 	add.w	r1, r7, #15
  8000a96:	f04f 33ff 	mov.w	r3, #4294967295
  8000a9a:	2201      	movs	r2, #1
@@ -1676,6 +1685,9 @@ uint8_t SPI_Read(uint8_t command)
  8000abc:	200004f0 	.word	0x200004f0
 
 08000ac0 <SPI_Read_Status>:
+ * Reads the STATUS register
+ * @return the STATUS register content
+ */
 
 uint8_t SPI_Read_Status()
 {
@@ -1739,13 +1751,13 @@ void SPI_Read_Buf(uint8_t command, uint8_t *dataBuf, uint16_t size)
  8000b1a:	2110      	movs	r1, #16
  8000b1c:	480c      	ldr	r0, [pc, #48]	; (8000b50 <SPI_Read_Buf+0x48>)
  8000b1e:	f000 fcc5 	bl	80014ac <HAL_GPIO_WritePin>
-    HAL_SPI_Transmit(&_spi, &command, 1, HAL_MAX_DELAY);           // select register
+    HAL_SPI_Transmit(&_spi, &command, 1, HAL_MAX_DELAY);           		// select register
  8000b22:	1df9      	adds	r1, r7, #7
  8000b24:	f04f 33ff 	mov.w	r3, #4294967295
  8000b28:	2201      	movs	r2, #1
  8000b2a:	480a      	ldr	r0, [pc, #40]	; (8000b54 <SPI_Read_Buf+0x4c>)
  8000b2c:	f002 f8e9 	bl	8002d02 <HAL_SPI_Transmit>
-    HAL_SPI_Receive (&_spi, dataBuf, size, HAL_MAX_DELAY);               // read register
+    HAL_SPI_Receive (&_spi, dataBuf, size, HAL_MAX_DELAY);              // read register
  8000b30:	88ba      	ldrh	r2, [r7, #4]
  8000b32:	f04f 33ff 	mov.w	r3, #4294967295
  8000b36:	6839      	ldr	r1, [r7, #0]
@@ -1767,7 +1779,7 @@ void SPI_Read_Buf(uint8_t command, uint8_t *dataBuf, uint16_t size)
 08000b58 <RX_Mode>:
 
 /**
- * Changes the nRF state to RX
+ * Changes the nRF state to RX, which it awaits a payload to be received
  **/
 void RX_Mode(void)
 {
@@ -1936,7 +1948,10 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
  8000c40:	200002cc 	.word	0x200002cc
 
 08000c44 <TX_Mode_NOACK>:
-
+ * Transmits a payload and returns to rx_mode
+ * @param buf The payload to be transmitted
+ * @param payloadLength The payload's length
+ */
 void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength)
 {
  8000c44:	b580      	push	{r7, lr}
@@ -1945,9 +1960,6 @@ void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength)
  8000c4a:	6078      	str	r0, [r7, #4]
  8000c4c:	460b      	mov	r3, r1
  8000c4e:	70fb      	strb	r3, [r7, #3]
-
-
-
 	  uint8_t statusReg;
 
 	  TX_OK = 0; //Iniciando transmissão (Na IRQ é setada para 1, indicando fim de transmissão
@@ -16582,7 +16594,6 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
  8006146:	480e      	ldr	r0, [pc, #56]	; (8006180 <CDC_Receive_FS+0x4c>)
  8006148:	f7fe fe93 	bl	8004e72 <USBD_CDC_ReceivePacket>
-
 
   memcpy(rf_tx_buffer, Buf, *Len);
  800614c:	683b      	ldr	r3, [r7, #0]

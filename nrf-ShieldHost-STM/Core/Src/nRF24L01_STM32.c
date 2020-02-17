@@ -42,22 +42,19 @@ GPIO_InitTypeDef RF_IRQ_Pin, GPIO_InitTypeDef RF_IRQ_GPIO_Port)
 }*/
 
 /**
- * Construtor usando pinos default
- * @param spi
+ * Construtor using the default pins
+ * @param spi its an SPI_HandleTypeDef object that contains the SPI informations
  **/
 void nRF24L01_STM32(SPI_HandleTypeDef spi)
 {
     _spi = spi;
 }
 
-////////////
-// PUBLIC //
-////////////
 /**
  * Inicia a comunicação com o rádio e define alguns parâmetros
- * @param rf_channel
- * @param rf_data_rate
- * @param rf_pwr
+ * @param rf_channel	The rf channel that will be used
+ * @param rf_data_rate	The radio's data rate in Mbps
+ * @param rf_pwr		The radio's power in dB
  */
 
 void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
@@ -110,8 +107,6 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
     // RF_CH register: Select RF channel
     SPI_Write_Reg(RF_CH, &rf_channel);          // Select RF channel: Fo = 2,490 GHz + rf_channel
 
-    /************************* CONTINUA DAQUI *************************/
-
     //RF SETUP
     //Ajustar potência de saída em modo TX (bits 2:1)
     //  bit 0 = 1 (setup LNA gain)
@@ -153,12 +148,7 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
     rf_setup_byte &= 0x0F;//0000 1111
     SPI_Write_Reg(RF_SETUP, &rf_setup_byte);     // TX_PWR:0dBm, Datarate:1Mbps, LNA:HCURR
 
-    // Garbage
-    /*
-    uint8_t addr_host[TX_RX_ADDR_WIDTH] = {0};
-    for(int i = 0; i < TX_RX_ADDR_WIDTH; i++)
-    	addr_host[i] = ADDR_HOST[i];
-    	*/
+
     //Transmiter Address.
     SPI_Write_Buf_Reg(TX_ADDR, &ADDR_HOST, TX_RX_ADDR_WIDTH);
     //Receiver Address - Pipe 0
@@ -254,12 +244,17 @@ uint8_t SPI_Read(uint8_t command)
     uint8_t reading = 0;
 
     HAL_GPIO_WritePin(_RF_CSN_GPIO_Port, _RF_CSN_Pin, GPIO_PIN_RESET);    // CSN low, initiate SPI transaction
-    HAL_SPI_Transmit(&_spi, &command, sizeof(command), HAL_MAX_DELAY); 
-    HAL_SPI_Receive (&_spi, &reading, sizeof(command), HAL_MAX_DELAY);
+    HAL_SPI_Transmit(&_spi, &command, sizeof(command), HAL_MAX_DELAY); 	  // Transmits the command
+    HAL_SPI_Receive (&_spi, &reading, sizeof(command), HAL_MAX_DELAY);	  // Saves the response in 'reading'
     HAL_GPIO_WritePin(_RF_CSN_GPIO_Port, _RF_CSN_Pin, GPIO_PIN_SET);      // CSN high again, ends SPI transaction
 
     return reading;
 }
+
+/**
+ * Reads the STATUS register
+ * @return the STATUS register content
+ */
 
 uint8_t SPI_Read_Status()
 {
@@ -299,27 +294,26 @@ uint8_t SPI_Read_Reg(uint8_t reg)
 void SPI_Read_Buf(uint8_t command, uint8_t *dataBuf, uint16_t size)
 {
     HAL_GPIO_WritePin(_RF_CSN_GPIO_Port, _RF_CSN_Pin, GPIO_PIN_RESET);  // CSN low, initiate SPI transaction
-    HAL_SPI_Transmit(&_spi, &command, 1, HAL_MAX_DELAY);           // select register
-    HAL_SPI_Receive (&_spi, dataBuf, size, HAL_MAX_DELAY);               // read register
+    HAL_SPI_Transmit(&_spi, &command, 1, HAL_MAX_DELAY);           		// select register
+    HAL_SPI_Receive (&_spi, dataBuf, size, HAL_MAX_DELAY);              // read register
     HAL_GPIO_WritePin(_RF_CSN_GPIO_Port, _RF_CSN_Pin, GPIO_PIN_SET);    // CSN high again, ends SPI transaction
 }
 
 /**
- * Sends a command and reads a buffer of bytes
- * @param command   SPI command
- * @param dataBuf   Buffer to store the data
+ * Reads the payload in RX using the R_RX_PAYLOAD command
+ * @param buf	Buffer to store the data received
  **/
 void SPI_Read_rx_buf(uint8_t *buf)
 {
 	uint8_t command = R_RX_PAYLOAD;
     HAL_GPIO_WritePin(_RF_CSN_GPIO_Port, _RF_CSN_Pin, GPIO_PIN_RESET);  // CSN low, initiate SPI transaction
-    HAL_SPI_Transmit(&_spi, &command, 1, HAL_MAX_DELAY);           // select register
-    HAL_SPI_Receive (&_spi, buf, PAYLOAD_WIDTH, HAL_MAX_DELAY);               // read register
+    HAL_SPI_Transmit(&_spi, &command, 1, HAL_MAX_DELAY);           		// select register
+    HAL_SPI_Receive (&_spi, buf, PAYLOAD_WIDTH, HAL_MAX_DELAY);         // read register
     HAL_GPIO_WritePin(_RF_CSN_GPIO_Port, _RF_CSN_Pin, GPIO_PIN_SET);    // CSN high again, ends SPI transaction
 }
 
 /**
- * Changes the nRF state to RX
+ * Changes the nRF state to RX, which it awaits a payload to be received
  **/
 void RX_Mode(void)
 {
@@ -393,11 +387,14 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
     SPI_Write_Reg(NRF_STATUS, &sta_val);
 }
 
+
+/**
+ * Transmits a payload and returns to rx_mode
+ * @param buf The payload to be transmitted
+ * @param payloadLength The payload's length
+ */
 void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength)
 {
-
-
-
 	  uint8_t statusReg;
 
 	  TX_OK = 0; //Iniciando transmissão (Na IRQ é setada para 1, indicando fim de transmissão
