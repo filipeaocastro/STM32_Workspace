@@ -74,7 +74,7 @@ const char endMsgChar = '\0'; 		//Messages ending character (from Host)
 uint8_t rf_tx_buffer[NUM_CHARS] = {0};
 int rf_tx_buffer_count = 0;
 uint8_t rf_tx_SendMsg = 0;
-uint8_t rfBridgeON = 0;
+uint8_t rfBridgeON = 0;				// Flag de ponte
 uint8_t rx_newData = 0;
 
 /* USER CODE END 0 */
@@ -135,9 +135,9 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	  if(rx_newData > 0)	// The rx_newData variable is modified in the callback function called when new data
-		  	  	  	  	  	//  comes through the serial port (CDC_Receive_FS)
-		  get_Msg_fromHost();
+
+	  get_Msg_fromHost();	// Read the messages from the host received via USB
+
 
 	  tx_task();	// If there is message from the Host, read correctly by get_Msg_fromHost(), it's
 	  	  	  	  	//  sent to the MIP via RF
@@ -288,6 +288,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   if(GPIO_Pin == RF_IRQ_Pin)
   {
 	  // As interrupções já podem ser tratadas?
+	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	  if(nRFint_guard > 0)
 		  // Salva o conteúdo em rx_buf, a qte de bytes em rx_payloadWidth e ativa a flag rx_newPayload.
 		  RF_IRQ(rx_buf, &rx_payloadWidth, &rx_newPayload);
@@ -310,7 +311,7 @@ void rx_task()
           //Enviar pacote recebido para o código do HOST (Visual Studio) via serial COMM (USB)
 
         	CDC_Transmit_FS(rx_buf, rx_payloadWidth);
-        	HAL_Delay(5);
+        	HAL_Delay(10);
         }
 
     }
@@ -327,14 +328,15 @@ void rx_task()
  */
 void get_Msg_fromHost()
 {
-    int i, rc;
 
-    rx_newData = 0;
+    // The rx_newData variable is modified in the callback function called when new data
+	//  comes through the serial port (CDC_Receive_FS)
 
     //Se não estiver enviando mensagem do Buffer TX para o HOST:
-    if (rf_tx_SendMsg == 0)
+    if ((rx_newData == 1) && (rf_tx_SendMsg == 0))
     {
-
+    	int i, rc;
+    	rx_newData = 0;
     	//memcpy(rf_tx_buffer, buf, len); // Salva os dados do vetor buf em rf_tx_buffer
     	//rf_tx_buffer_count = len;		// Salva a qte de bytes de len em rf_tx_buffer_count
 
@@ -384,7 +386,7 @@ void get_Msg_fromHost()
                 	HAL_Delay(5);
 
                   rfBridgeON = 1; //De agora em diante, todos os bytes recebidos do Host serão enviados ao MIP por RF.
-                  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+                  //HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
                 }
                 //Caso a mensagem tenha sido enviada para o Host (acima) ou não (deve ser ignorada):
                 rf_tx_buffer_count = 0; //reiniciar leitura de novas mensagens;
@@ -399,7 +401,7 @@ void get_Msg_fromHost()
  */
 void tx_task()
 {
-  uint8_t data_size, index_atual;
+  uint32_t data_size, index_atual;
 
   //Transmissão/Recepção de dados via RF liberada? E
   //Existe mensagem para ser enviada para o MIP via RF?
@@ -411,14 +413,16 @@ void tx_task()
   index_atual = 0;
   while (index_atual < data_size) // Verifica se todos os dados contidos já foram enviados
   {
+	uint32_t actual_length = data_size - index_atual;
+
     //Enquanto tiver algum para escrever
 	// Caso a mensagem possua menos, de 32 bytes ele envia apenas os bytes necessários
-    if ((data_size - index_atual) <= 32)
+    if (actual_length < 32)
     {
       //Se existem menos de 32 bytes para serem enviados
-      rfSendBuffer(&rf_tx_buffer[index_atual], (data_size - index_atual));
+      rfSendBuffer(&rf_tx_buffer[index_atual], (uint8_t)actual_length);
       HAL_Delay(1); //Aguardar transmissão -- max 32 bytes
-      index_atual = data_size;
+      index_atual += actual_length;
     }
     else
     {

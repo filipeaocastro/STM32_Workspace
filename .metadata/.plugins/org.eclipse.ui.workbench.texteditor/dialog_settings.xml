@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
-		<item key="selection" value="HAL_GPIO_TogglePin"/>
+		<item key="selection" value="Toggle"/>
 		<item key="wrap" value="false"/>
 		<item key="casesensitive" value="false"/>
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
+			<item value="toggle"/>
+			<item value="delay"/>
 			<item value="HAL_GPIO_TogglePin"/>
 			<item value="acender"/>
 			<item value="CDC_Transmit_FS"/>
@@ -21,8 +23,6 @@
 			<item value="rx_payloadWidth"/>
 			<item value="* "/>
 			<item value="*size"/>
-			<item value="callback"/>
-			<item value="irq_t"/>
 		</list>
 		<list key="replacehistory">
 			<item value="ligar"/>

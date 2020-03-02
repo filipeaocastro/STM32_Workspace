@@ -270,6 +270,9 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   rf_tx_buffer_count = *Len;
   rx_newData = 1;
 
+  //CDC_Transmit_FS(Buf, *Len);
+  //HAL_Delay(5);
+
   return (USBD_OK);
   /* USER CODE END 6 */
 }

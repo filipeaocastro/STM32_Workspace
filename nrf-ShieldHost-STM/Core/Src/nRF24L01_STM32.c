@@ -365,10 +365,10 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
         *size = SPI_Read(R_RX_PLD_WIDTH);  // Retorna o número de bytes no payload recebido
         SPI_Read_Buf(R_RX_PAYLOAD, buf, *size);  // read receive payload from RX_FIFO buffer
 
-        if(*size > 32)  //Não pode conter mais que 32 bytes
-        {
-            *size = 0;
-        }
+        //if(*size > 32)  //Não pode conter mais que 32 bytes
+        //{
+        //    *size = 0;
+        //}
         SPI_Write(FLUSH_RX, 0x00); //Limpar o buffer RX (os dados recebidos estão em rx_buf).
         //*size = 1; //indicar que um novo payload está disponível em rx_buf
         *newPayload = 1;
@@ -422,7 +422,7 @@ void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength)
 	  SPI_Write_Reg(CONFIG, &config);
 
 	  //enviar (transmitir) endereço do receptor para o qual a mensagem será enviada (o outro nRF24L01)
-	  SPI_Write_Buf_Reg(RX_ADDR_P0, &ADDR_HOST, TX_RX_ADDR_WIDTH);
+	  SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
 
 	  //Envia o payload para o transceiver.
 	  SPI_Write_Buf(W_TX_PAYLOAD_NOACK, buf, payloadLength); // Writes data to TX payload

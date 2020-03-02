@@ -109,6 +109,7 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
 extern void HAL_GPIO_TogglePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);
+extern void HAL_Delay(uint32_t Delay);
 /* USER CODE END EXPORTED_FUNCTIONS */
 
 /**
