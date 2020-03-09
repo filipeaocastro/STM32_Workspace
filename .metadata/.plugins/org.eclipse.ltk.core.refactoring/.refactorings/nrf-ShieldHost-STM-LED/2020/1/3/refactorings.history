@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;nrf-ShieldHost-STM-LED/nrf-ShieldHost-STM.ioc&apos; to &apos;nrf-ShieldHost-STM-LED.ioc&apos;" description="Rename resource &apos;nrf-ShieldHost-STM.ioc&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="nrf-ShieldHost-STM.ioc" name="nrf-ShieldHost-STM-LED.ioc" stamp="1579194177097" updateReferences="true"/>
-</session>
