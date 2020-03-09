@@ -122,7 +122,7 @@ int main(void)
   // Initiate the nRF with the channel, data rate and tx power parameters
   init(nRF_Canal, RF_DATA_RATE_1Mbps, RF_TX_POWER_0dBm);
   rx_newPayload = 0;
-  nRFint_guard = 1; //liberar execução da interrupção externa
+  nRFint_guard = 1; //Liberar execução da interrupção externa
 
 
   /* USER CODE END 2 */
