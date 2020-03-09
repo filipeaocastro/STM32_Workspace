@@ -150,13 +150,135 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
 
 
     //Transmiter Address.
-    SPI_Write_Buf_Reg(TX_ADDR, &ADDR_HOST, TX_RX_ADDR_WIDTH);
+    SPI_Write_Buf_Reg(TX_ADDR, ADDR_HOST, TX_RX_ADDR_WIDTH);
     //Receiver Address - Pipe 0
-    SPI_Write_Buf_Reg(RX_ADDR_P0, &ADDR_HOST, TX_RX_ADDR_WIDTH);
+    SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
     // Ativa Payload dinamico em data pipe 0
     SPI_Write_Reg(DYNPD, &dypnd_value);        // Ativa Payload dinâmico em data pipe 0
     // Ativa Payload dinamico, com ACK e comando W_TX_PAY
     SPI_Write_Reg(FEATURE, &feature_value);      // Ativa Payload dinâmico, com ACK e comando W_TX_PAY
+
+    //After the packet is validated, Enhanched ShockBurst™ disassembles the packet and loads the payload into
+    //the RX FIFO, and assert the RX_DR IRQ (active low)
+    //A interrupção é associada ao handler RF_IRQ (nesta classe), no código principal (rf_shield_Host.cpp).
+
+    // Clears the TX and RX FIFO
+    SPI_Write(FLUSH_TX, &zero);
+    SPI_Write(FLUSH_RX, &zero);
+
+    // Writes in the STATUS register
+    SPI_Write_Reg(NRF_STATUS, &nrf_status_value);
+
+    //SPI_Read_Reg(NRF_STATUS);
+
+    //Default: Stay in RX Mode waiting for data from MIP
+    RX_Mode();
+
+}
+
+void init_AA_EN(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
+{
+    // Setup values of the registers
+    uint8_t rf_setup_byte;
+    uint8_t setup_aw_value = 0x03;	//Setup of Address Widths ('11' - 5 bytes)
+    uint8_t en_aa_value = 0x01;		//Enable ‘Auto Acknowledgment’ Function on pipe 0
+    uint8_t en_rxaddr_value = 0x01;	//Enabled RX Addresses (only pipe 0)
+    uint8_t setup_retr_value = 0x05;//Setup of Automatic Retransmission (up to 5 retransmissions)
+    uint8_t dypnd_value = 0x01;		//Enable dynamic payload length
+    uint8_t feature_value = 0x05;	//Feature Register
+    uint8_t zero = 0x00;			// 0
+    uint8_t nrf_status_value = 0x07;// Status
+
+    //uint8_t addr_host[TX_RX_ADDR_WIDTH] = {0xE7,0xE7,0xE7,0xE7,0xE7};
+
+    //Aguardar sequencia de power-up _ start do CI (~12ms)
+    HAL_Delay(20);
+
+    //rx_newPayload = 0;      // Init with no new payload
+    //rx_payloadWidth = 0;    // It has no length
+    status = 0;             // Stores the STATUS register status
+    TX_OK = 0;              // initiates in stand-by
+    RX_OK = 0;              // "
+
+    // Set CSN high, no SPI transaction yet
+    HAL_GPIO_WritePin(_RF_CSN_GPIO_Port, _RF_CSN_Pin, GPIO_PIN_SET);
+
+    // Disable RX TX
+    HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
+
+    //Configuração:
+
+    //W_REGISTER=001A AAAA: Read command and status registers. AAAAA = 5 bit Register Map Address
+
+    // SETUP_AW register: Setup of Address Widths - (common for all data pipes)
+    SPI_Write_Reg(SETUP_AW, &setup_aw_value); //RX/TX Address field width 5 bytes
+    // Configuration register é definido quando entra no modo RX ou TX (ver funções para cada modo)
+
+    // EN_AA register: Enable Auto Acknowledgment: Pipe 0
+    SPI_Write_Reg(EN_AA, &en_aa_value);
+
+    // EN_RXADDR register: Enable Pipe0 (only pipe 0)
+    SPI_Write_Reg(EN_RXADDR, &en_rxaddr_value);
+
+    // SETUP_RETR register: Time to automatic retransmission selected: 250us, retransmission enabled
+    SPI_Write_Reg(SETUP_RETR, &setup_retr_value);
+
+    // RF_CH register: Select RF channel
+    SPI_Write_Reg(RF_CH, &rf_channel);	// Select RF channel: Fo = 2,490 GHz + rf_channel
+
+    //RF SETUP
+    //Ajustar potência de saída em modo TX (bits 2:1)
+    //  bit 0 = 1 (setup LNA gain)
+    rf_setup_byte = 0x01; //0000 0001
+    switch (rf_pwr)
+    {
+        case RF_TX_POWER_NEGATIVE_18dBm: //bits 2:1 = 00
+            rf_setup_byte &= 0xF9; //1111 1001
+        break;
+
+        case RF_TX_POWER_NEGATIVE_12dBm: //bits 2:1 = 01
+            rf_setup_byte |= 0x02;//0000 0010
+            rf_setup_byte &= 0xFB;//1111 1011
+        break;
+
+        case RF_TX_POWER_NEGATIVE_6dBm: //bits 2:1 = 10
+            rf_setup_byte &= 0xFD;//1111 1101
+            rf_setup_byte |= 0x04;//0000 0100
+        break;
+
+        case RF_TX_POWER_0dBm: //bits 2:1 = 11
+            rf_setup_byte |= 0x06;//0000 0110
+        break;
+
+        default:
+        break;
+    }
+        //Ajustar Air Data Rate (bit 3)
+        switch (rf_data_rate)
+        {
+        case RF_DATA_RATE_1Mbps: //bit 3 = 0
+            rf_setup_byte &= 0xF7;//1111 0111
+        break;
+        case RF_DATA_RATE_2Mbps: //bit 3 = 1
+            rf_setup_byte |= 0x08;//0000 1000
+        break;
+        }
+    //Bit 4: PLL_LOCK = 0; bits 7:5 = Reserved = 000
+    rf_setup_byte &= 0x0F;//0000 1111
+    SPI_Write_Reg(RF_SETUP, &rf_setup_byte);     // TX_PWR:0dBm, Datarate:1Mbps, LNA:HCURR
+
+
+    //Transmiter Address.
+    SPI_Write_Buf_Reg(TX_ADDR, ADDR_HOST, TX_RX_ADDR_WIDTH);
+
+    //Receiver Address - Pipe 0
+    SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
+
+    // Ativa Payload dinâmico em data pipe 0
+    SPI_Write_Reg(DYNPD, &dypnd_value);
+
+    // Ativa Payload dinâmico, ACK sem payload e comando W_TX_PAY
+    SPI_Write_Reg(FEATURE, &feature_value);
 
     //After the packet is validated, Enhanched ShockBurst™ disassembles the packet and loads the payload into
     //the RX FIFO, and assert the RX_DR IRQ (active low)

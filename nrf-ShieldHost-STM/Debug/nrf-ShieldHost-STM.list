@@ -27,23 +27,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000029  00000000  00000000  00020184  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00015de8  00000000  00000000  000201ad  2**0
+ 12 .debug_info   00015eb9  00000000  00000000  000201ad  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_abbrev 00003021  00000000  00000000  00035f95  2**0
+ 13 .debug_abbrev 00003021  00000000  00000000  00036066  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_aranges 00000d10  00000000  00000000  00038fb8  2**3
+ 14 .debug_aranges 00000d18  00000000  00000000  00039088  2**3
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_ranges 00000ba8  00000000  00000000  00039cc8  2**3
+ 15 .debug_ranges 00000bb0  00000000  00000000  00039da0  2**3
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_macro  00016b38  00000000  00000000  0003a870  2**0
+ 16 .debug_macro  00016b38  00000000  00000000  0003a950  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   0000d365  00000000  00000000  000513a8  2**0
+ 17 .debug_line   0000d3a5  00000000  00000000  00051488  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    0006f5ee  00000000  00000000  0005e70d  2**0
+ 18 .debug_str    0006f5f9  00000000  00000000  0005e82d  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  000cdcfb  2**0
+ 19 .comment      0000007b  00000000  00000000  000cde26  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00003394  00000000  00000000  000cdd78  2**2
+ 20 .debug_frame  000033b8  00000000  00000000  000cdea4  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -150,7 +150,7 @@ int main(void)
  80001a0:	4b0b      	ldr	r3, [pc, #44]	; (80001d0 <main+0x84>)
  80001a2:	2200      	movs	r2, #0
  80001a4:	701a      	strb	r2, [r3, #0]
-  nRFint_guard = 1; //liberar execução da interrupção externa
+  nRFint_guard = 1; //Liberar execução da interrupção externa
  80001a6:	4b05      	ldr	r3, [pc, #20]	; (80001bc <main+0x70>)
  80001a8:	2201      	movs	r2, #1
  80001aa:	701a      	strb	r2, [r3, #0]
@@ -1244,13 +1244,13 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
 
 
     //Transmiter Address.
-    SPI_Write_Buf_Reg(TX_ADDR, &ADDR_HOST, TX_RX_ADDR_WIDTH);
+    SPI_Write_Buf_Reg(TX_ADDR, ADDR_HOST, TX_RX_ADDR_WIDTH);
  80007c0:	2205      	movs	r2, #5
  80007c2:	491a      	ldr	r1, [pc, #104]	; (800082c <init+0x1a4>)
  80007c4:	2010      	movs	r0, #16
  80007c6:	f000 f85f 	bl	8000888 <SPI_Write_Buf_Reg>
     //Receiver Address - Pipe 0
-    SPI_Write_Buf_Reg(RX_ADDR_P0, &ADDR_HOST, TX_RX_ADDR_WIDTH);
+    SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
  80007ca:	2205      	movs	r2, #5
  80007cc:	4917      	ldr	r1, [pc, #92]	; (800082c <init+0x1a4>)
  80007ce:	200a      	movs	r0, #10
@@ -11995,151 +11995,151 @@ void USB_ReadPMA(USB_TypeDef *USBx, uint8_t *pbUsrBuf, uint16_t wPMABufAddr, uin
  800482a:	4770      	bx	lr
 
 0800482c <USBD_CDC_Init>:
-  *         Initialize the CDC interface
   * @param  pdev: device instance
   * @param  cfgidx: Configuration index
   * @retval status
   */
 static uint8_t  USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
+{
  800482c:	b580      	push	{r7, lr}
  800482e:	b084      	sub	sp, #16
  8004830:	af00      	add	r7, sp, #0
  8004832:	6078      	str	r0, [r7, #4]
  8004834:	460b      	mov	r3, r1
  8004836:	70fb      	strb	r3, [r7, #3]
-{
+  uint8_t ret = 0U;
  8004838:	2300      	movs	r3, #0
  800483a:	73fb      	strb	r3, [r7, #15]
-  uint8_t ret = 0U;
   USBD_CDC_HandleTypeDef   *hcdc;
 
+  if (pdev->dev_speed == USBD_SPEED_HIGH)
  800483c:	687b      	ldr	r3, [r7, #4]
  800483e:	7c1b      	ldrb	r3, [r3, #16]
  8004840:	2b00      	cmp	r3, #0
  8004842:	d115      	bne.n	8004870 <USBD_CDC_Init+0x44>
-  if (pdev->dev_speed == USBD_SPEED_HIGH)
   {
     /* Open EP IN */
+    USBD_LL_OpenEP(pdev, CDC_IN_EP, USBD_EP_TYPE_BULK,
  8004844:	f44f 7300 	mov.w	r3, #512	; 0x200
  8004848:	2202      	movs	r2, #2
  800484a:	2181      	movs	r1, #129	; 0x81
  800484c:	6878      	ldr	r0, [r7, #4]
  800484e:	f001 fe80 	bl	8006552 <USBD_LL_OpenEP>
-    USBD_LL_OpenEP(pdev, CDC_IN_EP, USBD_EP_TYPE_BULK,
                    CDC_DATA_HS_IN_PACKET_SIZE);
 
+    pdev->ep_in[CDC_IN_EP & 0xFU].is_used = 1U;
  8004852:	687b      	ldr	r3, [r7, #4]
  8004854:	2201      	movs	r2, #1
  8004856:	62da      	str	r2, [r3, #44]	; 0x2c
-    pdev->ep_in[CDC_IN_EP & 0xFU].is_used = 1U;
 
     /* Open EP OUT */
+    USBD_LL_OpenEP(pdev, CDC_OUT_EP, USBD_EP_TYPE_BULK,
  8004858:	f44f 7300 	mov.w	r3, #512	; 0x200
  800485c:	2202      	movs	r2, #2
  800485e:	2101      	movs	r1, #1
  8004860:	6878      	ldr	r0, [r7, #4]
  8004862:	f001 fe76 	bl	8006552 <USBD_LL_OpenEP>
-    USBD_LL_OpenEP(pdev, CDC_OUT_EP, USBD_EP_TYPE_BULK,
                    CDC_DATA_HS_OUT_PACKET_SIZE);
 
+    pdev->ep_out[CDC_OUT_EP & 0xFU].is_used = 1U;
  8004866:	687b      	ldr	r3, [r7, #4]
  8004868:	2201      	movs	r2, #1
  800486a:	f8c3 216c 	str.w	r2, [r3, #364]	; 0x16c
  800486e:	e012      	b.n	8004896 <USBD_CDC_Init+0x6a>
-    pdev->ep_out[CDC_OUT_EP & 0xFU].is_used = 1U;
 
   }
   else
   {
     /* Open EP IN */
+    USBD_LL_OpenEP(pdev, CDC_IN_EP, USBD_EP_TYPE_BULK,
  8004870:	2340      	movs	r3, #64	; 0x40
  8004872:	2202      	movs	r2, #2
  8004874:	2181      	movs	r1, #129	; 0x81
  8004876:	6878      	ldr	r0, [r7, #4]
  8004878:	f001 fe6b 	bl	8006552 <USBD_LL_OpenEP>
-    USBD_LL_OpenEP(pdev, CDC_IN_EP, USBD_EP_TYPE_BULK,
                    CDC_DATA_FS_IN_PACKET_SIZE);
 
+    pdev->ep_in[CDC_IN_EP & 0xFU].is_used = 1U;
  800487c:	687b      	ldr	r3, [r7, #4]
  800487e:	2201      	movs	r2, #1
  8004880:	62da      	str	r2, [r3, #44]	; 0x2c
-    pdev->ep_in[CDC_IN_EP & 0xFU].is_used = 1U;
 
     /* Open EP OUT */
+    USBD_LL_OpenEP(pdev, CDC_OUT_EP, USBD_EP_TYPE_BULK,
  8004882:	2340      	movs	r3, #64	; 0x40
  8004884:	2202      	movs	r2, #2
  8004886:	2101      	movs	r1, #1
  8004888:	6878      	ldr	r0, [r7, #4]
  800488a:	f001 fe62 	bl	8006552 <USBD_LL_OpenEP>
-    USBD_LL_OpenEP(pdev, CDC_OUT_EP, USBD_EP_TYPE_BULK,
                    CDC_DATA_FS_OUT_PACKET_SIZE);
 
+    pdev->ep_out[CDC_OUT_EP & 0xFU].is_used = 1U;
  800488e:	687b      	ldr	r3, [r7, #4]
  8004890:	2201      	movs	r2, #1
  8004892:	f8c3 216c 	str.w	r2, [r3, #364]	; 0x16c
-    pdev->ep_out[CDC_OUT_EP & 0xFU].is_used = 1U;
   }
   /* Open Command IN EP */
+  USBD_LL_OpenEP(pdev, CDC_CMD_EP, USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
  8004896:	2308      	movs	r3, #8
  8004898:	2203      	movs	r2, #3
  800489a:	2182      	movs	r1, #130	; 0x82
  800489c:	6878      	ldr	r0, [r7, #4]
  800489e:	f001 fe58 	bl	8006552 <USBD_LL_OpenEP>
-  USBD_LL_OpenEP(pdev, CDC_CMD_EP, USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
+  pdev->ep_in[CDC_CMD_EP & 0xFU].is_used = 1U;
  80048a2:	687b      	ldr	r3, [r7, #4]
  80048a4:	2201      	movs	r2, #1
  80048a6:	641a      	str	r2, [r3, #64]	; 0x40
-  pdev->ep_in[CDC_CMD_EP & 0xFU].is_used = 1U;
 
+  pdev->pClassData = USBD_malloc(sizeof(USBD_CDC_HandleTypeDef));
  80048a8:	f44f 7007 	mov.w	r0, #540	; 0x21c
  80048ac:	f001 ff72 	bl	8006794 <USBD_static_malloc>
  80048b0:	4602      	mov	r2, r0
  80048b2:	687b      	ldr	r3, [r7, #4]
  80048b4:	f8c3 22b8 	str.w	r2, [r3, #696]	; 0x2b8
-  pdev->pClassData = USBD_malloc(sizeof(USBD_CDC_HandleTypeDef));
 
+  if (pdev->pClassData == NULL)
  80048b8:	687b      	ldr	r3, [r7, #4]
  80048ba:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  80048be:	2b00      	cmp	r3, #0
  80048c0:	d102      	bne.n	80048c8 <USBD_CDC_Init+0x9c>
-  if (pdev->pClassData == NULL)
   {
+    ret = 1U;
  80048c2:	2301      	movs	r3, #1
  80048c4:	73fb      	strb	r3, [r7, #15]
  80048c6:	e026      	b.n	8004916 <USBD_CDC_Init+0xea>
-    ret = 1U;
   }
   else
   {
+    hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
  80048c8:	687b      	ldr	r3, [r7, #4]
  80048ca:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  80048ce:	60bb      	str	r3, [r7, #8]
-    hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
 
     /* Init  physical Interface components */
+    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Init();
  80048d0:	687b      	ldr	r3, [r7, #4]
  80048d2:	f8d3 32bc 	ldr.w	r3, [r3, #700]	; 0x2bc
  80048d6:	681b      	ldr	r3, [r3, #0]
  80048d8:	4798      	blx	r3
-    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Init();
 
     /* Init Xfer states */
+    hcdc->TxState = 0U;
  80048da:	68bb      	ldr	r3, [r7, #8]
  80048dc:	2200      	movs	r2, #0
  80048de:	f8c3 2214 	str.w	r2, [r3, #532]	; 0x214
-    hcdc->TxState = 0U;
+    hcdc->RxState = 0U;
  80048e2:	68bb      	ldr	r3, [r7, #8]
  80048e4:	2200      	movs	r2, #0
  80048e6:	f8c3 2218 	str.w	r2, [r3, #536]	; 0x218
-    hcdc->RxState = 0U;
 
+    if (pdev->dev_speed == USBD_SPEED_HIGH)
  80048ea:	687b      	ldr	r3, [r7, #4]
  80048ec:	7c1b      	ldrb	r3, [r3, #16]
  80048ee:	2b00      	cmp	r3, #0
  80048f0:	d109      	bne.n	8004906 <USBD_CDC_Init+0xda>
-    if (pdev->dev_speed == USBD_SPEED_HIGH)
     {
       /* Prepare Out endpoint to receive next packet */
+      USBD_LL_PrepareReceive(pdev, CDC_OUT_EP, hcdc->RxBuffer,
  80048f2:	68bb      	ldr	r3, [r7, #8]
  80048f4:	f8d3 2204 	ldr.w	r2, [r3, #516]	; 0x204
  80048f8:	f44f 7300 	mov.w	r3, #512	; 0x200
@@ -12147,134 +12147,134 @@ static uint8_t  USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
  80048fe:	6878      	ldr	r0, [r7, #4]
  8004900:	f001 ff11 	bl	8006726 <USBD_LL_PrepareReceive>
  8004904:	e007      	b.n	8004916 <USBD_CDC_Init+0xea>
-      USBD_LL_PrepareReceive(pdev, CDC_OUT_EP, hcdc->RxBuffer,
                              CDC_DATA_HS_OUT_PACKET_SIZE);
     }
     else
     {
       /* Prepare Out endpoint to receive next packet */
+      USBD_LL_PrepareReceive(pdev, CDC_OUT_EP, hcdc->RxBuffer,
  8004906:	68bb      	ldr	r3, [r7, #8]
  8004908:	f8d3 2204 	ldr.w	r2, [r3, #516]	; 0x204
  800490c:	2340      	movs	r3, #64	; 0x40
  800490e:	2101      	movs	r1, #1
  8004910:	6878      	ldr	r0, [r7, #4]
  8004912:	f001 ff08 	bl	8006726 <USBD_LL_PrepareReceive>
-      USBD_LL_PrepareReceive(pdev, CDC_OUT_EP, hcdc->RxBuffer,
                              CDC_DATA_FS_OUT_PACKET_SIZE);
     }
   }
- 8004916:	7bfb      	ldrb	r3, [r7, #15]
   return ret;
+ 8004916:	7bfb      	ldrb	r3, [r7, #15]
+}
  8004918:	4618      	mov	r0, r3
  800491a:	3710      	adds	r7, #16
  800491c:	46bd      	mov	sp, r7
  800491e:	bd80      	pop	{r7, pc}
 
 08004920 <USBD_CDC_DeInit>:
-  *         DeInitialize the CDC layer
   * @param  pdev: device instance
   * @param  cfgidx: Configuration index
   * @retval status
   */
 static uint8_t  USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
+{
  8004920:	b580      	push	{r7, lr}
  8004922:	b084      	sub	sp, #16
  8004924:	af00      	add	r7, sp, #0
  8004926:	6078      	str	r0, [r7, #4]
  8004928:	460b      	mov	r3, r1
  800492a:	70fb      	strb	r3, [r7, #3]
-{
+  uint8_t ret = 0U;
  800492c:	2300      	movs	r3, #0
  800492e:	73fb      	strb	r3, [r7, #15]
-  uint8_t ret = 0U;
 
   /* Close EP IN */
+  USBD_LL_CloseEP(pdev, CDC_IN_EP);
  8004930:	2181      	movs	r1, #129	; 0x81
  8004932:	6878      	ldr	r0, [r7, #4]
  8004934:	f001 fe33 	bl	800659e <USBD_LL_CloseEP>
-  USBD_LL_CloseEP(pdev, CDC_IN_EP);
+  pdev->ep_in[CDC_IN_EP & 0xFU].is_used = 0U;
  8004938:	687b      	ldr	r3, [r7, #4]
  800493a:	2200      	movs	r2, #0
  800493c:	62da      	str	r2, [r3, #44]	; 0x2c
-  pdev->ep_in[CDC_IN_EP & 0xFU].is_used = 0U;
 
   /* Close EP OUT */
+  USBD_LL_CloseEP(pdev, CDC_OUT_EP);
  800493e:	2101      	movs	r1, #1
  8004940:	6878      	ldr	r0, [r7, #4]
  8004942:	f001 fe2c 	bl	800659e <USBD_LL_CloseEP>
-  USBD_LL_CloseEP(pdev, CDC_OUT_EP);
+  pdev->ep_out[CDC_OUT_EP & 0xFU].is_used = 0U;
  8004946:	687b      	ldr	r3, [r7, #4]
  8004948:	2200      	movs	r2, #0
  800494a:	f8c3 216c 	str.w	r2, [r3, #364]	; 0x16c
-  pdev->ep_out[CDC_OUT_EP & 0xFU].is_used = 0U;
 
   /* Close Command IN EP */
+  USBD_LL_CloseEP(pdev, CDC_CMD_EP);
  800494e:	2182      	movs	r1, #130	; 0x82
  8004950:	6878      	ldr	r0, [r7, #4]
  8004952:	f001 fe24 	bl	800659e <USBD_LL_CloseEP>
-  USBD_LL_CloseEP(pdev, CDC_CMD_EP);
+  pdev->ep_in[CDC_CMD_EP & 0xFU].is_used = 0U;
  8004956:	687b      	ldr	r3, [r7, #4]
  8004958:	2200      	movs	r2, #0
  800495a:	641a      	str	r2, [r3, #64]	; 0x40
-  pdev->ep_in[CDC_CMD_EP & 0xFU].is_used = 0U;
 
   /* DeInit  physical Interface components */
+  if (pdev->pClassData != NULL)
  800495c:	687b      	ldr	r3, [r7, #4]
  800495e:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004962:	2b00      	cmp	r3, #0
  8004964:	d00e      	beq.n	8004984 <USBD_CDC_DeInit+0x64>
-  if (pdev->pClassData != NULL)
   {
+    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->DeInit();
  8004966:	687b      	ldr	r3, [r7, #4]
  8004968:	f8d3 32bc 	ldr.w	r3, [r3, #700]	; 0x2bc
  800496c:	685b      	ldr	r3, [r3, #4]
  800496e:	4798      	blx	r3
-    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->DeInit();
+    USBD_free(pdev->pClassData);
  8004970:	687b      	ldr	r3, [r7, #4]
  8004972:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004976:	4618      	mov	r0, r3
  8004978:	f001 ff18 	bl	80067ac <USBD_static_free>
-    USBD_free(pdev->pClassData);
+    pdev->pClassData = NULL;
  800497c:	687b      	ldr	r3, [r7, #4]
  800497e:	2200      	movs	r2, #0
  8004980:	f8c3 22b8 	str.w	r2, [r3, #696]	; 0x2b8
-    pdev->pClassData = NULL;
   }
 
- 8004984:	7bfb      	ldrb	r3, [r7, #15]
   return ret;
+ 8004984:	7bfb      	ldrb	r3, [r7, #15]
+}
  8004986:	4618      	mov	r0, r3
  8004988:	3710      	adds	r7, #16
  800498a:	46bd      	mov	sp, r7
  800498c:	bd80      	pop	{r7, pc}
 
 0800498e <USBD_CDC_Setup>:
-  * @param  pdev: instance
   * @param  req: usb requests
   * @retval status
   */
 static uint8_t  USBD_CDC_Setup(USBD_HandleTypeDef *pdev,
                                USBD_SetupReqTypedef *req)
+{
  800498e:	b580      	push	{r7, lr}
  8004990:	b086      	sub	sp, #24
  8004992:	af00      	add	r7, sp, #0
  8004994:	6078      	str	r0, [r7, #4]
  8004996:	6039      	str	r1, [r7, #0]
-{
+  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
  8004998:	687b      	ldr	r3, [r7, #4]
  800499a:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  800499e:	613b      	str	r3, [r7, #16]
-  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
+  uint8_t ifalt = 0U;
  80049a0:	2300      	movs	r3, #0
  80049a2:	73fb      	strb	r3, [r7, #15]
-  uint8_t ifalt = 0U;
+  uint16_t status_info = 0U;
  80049a4:	2300      	movs	r3, #0
  80049a6:	81bb      	strh	r3, [r7, #12]
-  uint16_t status_info = 0U;
+  uint8_t ret = USBD_OK;
  80049a8:	2300      	movs	r3, #0
  80049aa:	75fb      	strb	r3, [r7, #23]
-  uint8_t ret = USBD_OK;
 
+  switch (req->bmRequest & USB_REQ_TYPE_MASK)
  80049ac:	683b      	ldr	r3, [r7, #0]
  80049ae:	781b      	ldrb	r3, [r3, #0]
  80049b0:	f003 0360 	and.w	r3, r3, #96	; 0x60
@@ -12282,70 +12282,70 @@ static uint8_t  USBD_CDC_Setup(USBD_HandleTypeDef *pdev,
  80049b6:	d039      	beq.n	8004a2c <USBD_CDC_Setup+0x9e>
  80049b8:	2b20      	cmp	r3, #32
  80049ba:	d17c      	bne.n	8004ab6 <USBD_CDC_Setup+0x128>
-  switch (req->bmRequest & USB_REQ_TYPE_MASK)
   {
     case USB_REQ_TYPE_CLASS :
+      if (req->wLength)
  80049bc:	683b      	ldr	r3, [r7, #0]
  80049be:	88db      	ldrh	r3, [r3, #6]
  80049c0:	2b00      	cmp	r3, #0
  80049c2:	d029      	beq.n	8004a18 <USBD_CDC_Setup+0x8a>
-      if (req->wLength)
       {
+        if (req->bmRequest & 0x80U)
  80049c4:	683b      	ldr	r3, [r7, #0]
  80049c6:	781b      	ldrb	r3, [r3, #0]
  80049c8:	b25b      	sxtb	r3, r3
  80049ca:	2b00      	cmp	r3, #0
  80049cc:	da11      	bge.n	80049f2 <USBD_CDC_Setup+0x64>
-        if (req->bmRequest & 0x80U)
         {
+          ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Control(req->bRequest,
  80049ce:	687b      	ldr	r3, [r7, #4]
  80049d0:	f8d3 32bc 	ldr.w	r3, [r3, #700]	; 0x2bc
  80049d4:	689b      	ldr	r3, [r3, #8]
  80049d6:	683a      	ldr	r2, [r7, #0]
  80049d8:	7850      	ldrb	r0, [r2, #1]
-          ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Control(req->bRequest,
+                                                            (uint8_t *)(void *)hcdc->data,
  80049da:	6939      	ldr	r1, [r7, #16]
-        {
+          ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Control(req->bRequest,
  80049dc:	683a      	ldr	r2, [r7, #0]
  80049de:	88d2      	ldrh	r2, [r2, #6]
  80049e0:	4798      	blx	r3
-                                                            (uint8_t *)(void *)hcdc->data,
                                                             req->wLength);
 
+          USBD_CtlSendData(pdev, (uint8_t *)(void *)hcdc->data, req->wLength);
  80049e2:	6939      	ldr	r1, [r7, #16]
  80049e4:	683b      	ldr	r3, [r7, #0]
  80049e6:	88db      	ldrh	r3, [r3, #6]
  80049e8:	461a      	mov	r2, r3
  80049ea:	6878      	ldr	r0, [r7, #4]
  80049ec:	f001 f9f6 	bl	8005ddc <USBD_CtlSendData>
-      }
       else
       {
         ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Control(req->bRequest,
                                                           (uint8_t *)(void *)req, 0U);
       }
+      break;
  80049f0:	e068      	b.n	8004ac4 <USBD_CDC_Setup+0x136>
-        {
+          hcdc->CmdOpCode = req->bRequest;
  80049f2:	683b      	ldr	r3, [r7, #0]
  80049f4:	785a      	ldrb	r2, [r3, #1]
  80049f6:	693b      	ldr	r3, [r7, #16]
  80049f8:	f883 2200 	strb.w	r2, [r3, #512]	; 0x200
-          hcdc->CmdOpCode = req->bRequest;
+          hcdc->CmdLength = (uint8_t)req->wLength;
  80049fc:	683b      	ldr	r3, [r7, #0]
  80049fe:	88db      	ldrh	r3, [r3, #6]
  8004a00:	b2da      	uxtb	r2, r3
  8004a02:	693b      	ldr	r3, [r7, #16]
  8004a04:	f883 2201 	strb.w	r2, [r3, #513]	; 0x201
-
+          USBD_CtlPrepareRx(pdev, (uint8_t *)(void *)hcdc->data, req->wLength);
  8004a08:	6939      	ldr	r1, [r7, #16]
  8004a0a:	683b      	ldr	r3, [r7, #0]
  8004a0c:	88db      	ldrh	r3, [r3, #6]
  8004a0e:	461a      	mov	r2, r3
  8004a10:	6878      	ldr	r0, [r7, #4]
  8004a12:	f001 fa11 	bl	8005e38 <USBD_CtlPrepareRx>
-      }
+      break;
  8004a16:	e055      	b.n	8004ac4 <USBD_CDC_Setup+0x136>
-      {
+        ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Control(req->bRequest,
  8004a18:	687b      	ldr	r3, [r7, #4]
  8004a1a:	f8d3 32bc 	ldr.w	r3, [r3, #700]	; 0x2bc
  8004a1e:	689b      	ldr	r3, [r3, #8]
@@ -12354,11 +12354,11 @@ static uint8_t  USBD_CDC_Setup(USBD_HandleTypeDef *pdev,
  8004a24:	2200      	movs	r2, #0
  8004a26:	6839      	ldr	r1, [r7, #0]
  8004a28:	4798      	blx	r3
-      }
- 8004a2a:	e04b      	b.n	8004ac4 <USBD_CDC_Setup+0x136>
       break;
+ 8004a2a:	e04b      	b.n	8004ac4 <USBD_CDC_Setup+0x136>
 
     case USB_REQ_TYPE_STANDARD:
+      switch (req->bRequest)
  8004a2c:	683b      	ldr	r3, [r7, #0]
  8004a2e:	785b      	ldrb	r3, [r3, #1]
  8004a30:	2b0a      	cmp	r3, #10
@@ -12367,150 +12367,150 @@ static uint8_t  USBD_CDC_Setup(USBD_HandleTypeDef *pdev,
  8004a36:	d029      	beq.n	8004a8c <USBD_CDC_Setup+0xfe>
  8004a38:	2b00      	cmp	r3, #0
  8004a3a:	d133      	bne.n	8004aa4 <USBD_CDC_Setup+0x116>
-      switch (req->bRequest)
       {
         case USB_REQ_GET_STATUS:
+          if (pdev->dev_state == USBD_STATE_CONFIGURED)
  8004a3c:	687b      	ldr	r3, [r7, #4]
  8004a3e:	f893 329c 	ldrb.w	r3, [r3, #668]	; 0x29c
  8004a42:	2b03      	cmp	r3, #3
  8004a44:	d107      	bne.n	8004a56 <USBD_CDC_Setup+0xc8>
-          if (pdev->dev_state == USBD_STATE_CONFIGURED)
           {
+            USBD_CtlSendData(pdev, (uint8_t *)(void *)&status_info, 2U);
  8004a46:	f107 030c 	add.w	r3, r7, #12
  8004a4a:	2202      	movs	r2, #2
  8004a4c:	4619      	mov	r1, r3
  8004a4e:	6878      	ldr	r0, [r7, #4]
  8004a50:	f001 f9c4 	bl	8005ddc <USBD_CtlSendData>
-          }
           else
           {
             USBD_CtlError(pdev, req);
             ret = USBD_FAIL;
           }
+          break;
  8004a54:	e02e      	b.n	8004ab4 <USBD_CDC_Setup+0x126>
-          {
+            USBD_CtlError(pdev, req);
  8004a56:	6839      	ldr	r1, [r7, #0]
  8004a58:	6878      	ldr	r0, [r7, #4]
  8004a5a:	f001 f955 	bl	8005d08 <USBD_CtlError>
-            USBD_CtlError(pdev, req);
+            ret = USBD_FAIL;
  8004a5e:	2302      	movs	r3, #2
  8004a60:	75fb      	strb	r3, [r7, #23]
-          }
- 8004a62:	e027      	b.n	8004ab4 <USBD_CDC_Setup+0x126>
           break;
+ 8004a62:	e027      	b.n	8004ab4 <USBD_CDC_Setup+0x126>
 
         case USB_REQ_GET_INTERFACE:
+          if (pdev->dev_state == USBD_STATE_CONFIGURED)
  8004a64:	687b      	ldr	r3, [r7, #4]
  8004a66:	f893 329c 	ldrb.w	r3, [r3, #668]	; 0x29c
  8004a6a:	2b03      	cmp	r3, #3
  8004a6c:	d107      	bne.n	8004a7e <USBD_CDC_Setup+0xf0>
-          if (pdev->dev_state == USBD_STATE_CONFIGURED)
           {
+            USBD_CtlSendData(pdev, &ifalt, 1U);
  8004a6e:	f107 030f 	add.w	r3, r7, #15
  8004a72:	2201      	movs	r2, #1
  8004a74:	4619      	mov	r1, r3
  8004a76:	6878      	ldr	r0, [r7, #4]
  8004a78:	f001 f9b0 	bl	8005ddc <USBD_CtlSendData>
-          }
           else
           {
             USBD_CtlError(pdev, req);
             ret = USBD_FAIL;
           }
+          break;
  8004a7c:	e01a      	b.n	8004ab4 <USBD_CDC_Setup+0x126>
-          {
+            USBD_CtlError(pdev, req);
  8004a7e:	6839      	ldr	r1, [r7, #0]
  8004a80:	6878      	ldr	r0, [r7, #4]
  8004a82:	f001 f941 	bl	8005d08 <USBD_CtlError>
-            USBD_CtlError(pdev, req);
+            ret = USBD_FAIL;
  8004a86:	2302      	movs	r3, #2
  8004a88:	75fb      	strb	r3, [r7, #23]
-          }
- 8004a8a:	e013      	b.n	8004ab4 <USBD_CDC_Setup+0x126>
           break;
+ 8004a8a:	e013      	b.n	8004ab4 <USBD_CDC_Setup+0x126>
 
         case USB_REQ_SET_INTERFACE:
+          if (pdev->dev_state != USBD_STATE_CONFIGURED)
  8004a8c:	687b      	ldr	r3, [r7, #4]
  8004a8e:	f893 329c 	ldrb.w	r3, [r3, #668]	; 0x29c
  8004a92:	2b03      	cmp	r3, #3
  8004a94:	d00d      	beq.n	8004ab2 <USBD_CDC_Setup+0x124>
-          if (pdev->dev_state != USBD_STATE_CONFIGURED)
           {
+            USBD_CtlError(pdev, req);
  8004a96:	6839      	ldr	r1, [r7, #0]
  8004a98:	6878      	ldr	r0, [r7, #4]
  8004a9a:	f001 f935 	bl	8005d08 <USBD_CtlError>
-            USBD_CtlError(pdev, req);
+            ret = USBD_FAIL;
  8004a9e:	2302      	movs	r3, #2
  8004aa0:	75fb      	strb	r3, [r7, #23]
-            ret = USBD_FAIL;
           }
- 8004aa2:	e006      	b.n	8004ab2 <USBD_CDC_Setup+0x124>
           break;
+ 8004aa2:	e006      	b.n	8004ab2 <USBD_CDC_Setup+0x124>
 
         default:
+          USBD_CtlError(pdev, req);
  8004aa4:	6839      	ldr	r1, [r7, #0]
  8004aa6:	6878      	ldr	r0, [r7, #4]
  8004aa8:	f001 f92e 	bl	8005d08 <USBD_CtlError>
-          USBD_CtlError(pdev, req);
+          ret = USBD_FAIL;
  8004aac:	2302      	movs	r3, #2
  8004aae:	75fb      	strb	r3, [r7, #23]
-          ret = USBD_FAIL;
- 8004ab0:	e000      	b.n	8004ab4 <USBD_CDC_Setup+0x126>
-          }
- 8004ab2:	bf00      	nop
           break;
+ 8004ab0:	e000      	b.n	8004ab4 <USBD_CDC_Setup+0x126>
+          break;
+ 8004ab2:	bf00      	nop
       }
- 8004ab4:	e006      	b.n	8004ac4 <USBD_CDC_Setup+0x136>
       break;
+ 8004ab4:	e006      	b.n	8004ac4 <USBD_CDC_Setup+0x136>
 
     default:
+      USBD_CtlError(pdev, req);
  8004ab6:	6839      	ldr	r1, [r7, #0]
  8004ab8:	6878      	ldr	r0, [r7, #4]
  8004aba:	f001 f925 	bl	8005d08 <USBD_CtlError>
-      USBD_CtlError(pdev, req);
+      ret = USBD_FAIL;
  8004abe:	2302      	movs	r3, #2
  8004ac0:	75fb      	strb	r3, [r7, #23]
-      ret = USBD_FAIL;
- 8004ac2:	bf00      	nop
       break;
+ 8004ac2:	bf00      	nop
   }
 
- 8004ac4:	7dfb      	ldrb	r3, [r7, #23]
   return ret;
+ 8004ac4:	7dfb      	ldrb	r3, [r7, #23]
+}
  8004ac6:	4618      	mov	r0, r3
  8004ac8:	3718      	adds	r7, #24
  8004aca:	46bd      	mov	sp, r7
  8004acc:	bd80      	pop	{r7, pc}
 
 08004ace <USBD_CDC_DataIn>:
-  *         Data sent on non-control IN endpoint
   * @param  pdev: device instance
   * @param  epnum: endpoint number
   * @retval status
   */
 static uint8_t  USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
+{
  8004ace:	b580      	push	{r7, lr}
  8004ad0:	b084      	sub	sp, #16
  8004ad2:	af00      	add	r7, sp, #0
  8004ad4:	6078      	str	r0, [r7, #4]
  8004ad6:	460b      	mov	r3, r1
  8004ad8:	70fb      	strb	r3, [r7, #3]
-{
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassData;
  8004ada:	687b      	ldr	r3, [r7, #4]
  8004adc:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004ae0:	60fb      	str	r3, [r7, #12]
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *)pdev->pClassData;
+  PCD_HandleTypeDef *hpcd = pdev->pData;
  8004ae2:	687b      	ldr	r3, [r7, #4]
  8004ae4:	f8d3 32c0 	ldr.w	r3, [r3, #704]	; 0x2c0
  8004ae8:	60bb      	str	r3, [r7, #8]
-  PCD_HandleTypeDef *hpcd = pdev->pData;
 
+  if (pdev->pClassData != NULL)
  8004aea:	687b      	ldr	r3, [r7, #4]
  8004aec:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004af0:	2b00      	cmp	r3, #0
  8004af2:	d037      	beq.n	8004b64 <USBD_CDC_DataIn+0x96>
-  if (pdev->pClassData != NULL)
   {
+    if ((pdev->ep_in[epnum].total_length > 0U) && ((pdev->ep_in[epnum].total_length % hpcd->IN_ep[epnum].maxpacket) == 0U))
  8004af4:	78fa      	ldrb	r2, [r7, #3]
  8004af6:	6879      	ldr	r1, [r7, #4]
  8004af8:	4613      	mov	r3, r2
@@ -12542,9 +12542,9 @@ static uint8_t  USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
  8004b30:	1a9b      	subs	r3, r3, r2
  8004b32:	2b00      	cmp	r3, #0
  8004b34:	d110      	bne.n	8004b58 <USBD_CDC_DataIn+0x8a>
-    if ((pdev->ep_in[epnum].total_length > 0U) && ((pdev->ep_in[epnum].total_length % hpcd->IN_ep[epnum].maxpacket) == 0U))
     {
       /* Update the packet total length */
+      pdev->ep_in[epnum].total_length = 0U;
  8004b36:	78fa      	ldrb	r2, [r7, #3]
  8004b38:	6879      	ldr	r1, [r7, #4]
  8004b3a:	4613      	mov	r3, r2
@@ -12555,58 +12555,58 @@ static uint8_t  USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
  8004b44:	331c      	adds	r3, #28
  8004b46:	2200      	movs	r2, #0
  8004b48:	601a      	str	r2, [r3, #0]
-      pdev->ep_in[epnum].total_length = 0U;
 
       /* Send ZLP */
+      USBD_LL_Transmit(pdev, epnum, NULL, 0U);
  8004b4a:	78f9      	ldrb	r1, [r7, #3]
  8004b4c:	2300      	movs	r3, #0
  8004b4e:	2200      	movs	r2, #0
  8004b50:	6878      	ldr	r0, [r7, #4]
  8004b52:	f001 fdc5 	bl	80066e0 <USBD_LL_Transmit>
  8004b56:	e003      	b.n	8004b60 <USBD_CDC_DataIn+0x92>
-      USBD_LL_Transmit(pdev, epnum, NULL, 0U);
     }
     else
     {
+      hcdc->TxState = 0U;
  8004b58:	68fb      	ldr	r3, [r7, #12]
  8004b5a:	2200      	movs	r2, #0
  8004b5c:	f8c3 2214 	str.w	r2, [r3, #532]	; 0x214
-      hcdc->TxState = 0U;
     }
+    return USBD_OK;
  8004b60:	2300      	movs	r3, #0
  8004b62:	e000      	b.n	8004b66 <USBD_CDC_DataIn+0x98>
-    return USBD_OK;
   }
   else
   {
- 8004b64:	2302      	movs	r3, #2
     return USBD_FAIL;
+ 8004b64:	2302      	movs	r3, #2
   }
+}
  8004b66:	4618      	mov	r0, r3
  8004b68:	3710      	adds	r7, #16
  8004b6a:	46bd      	mov	sp, r7
  8004b6c:	bd80      	pop	{r7, pc}
 
 08004b6e <USBD_CDC_DataOut>:
-  *         Data received on non-control Out endpoint
   * @param  pdev: device instance
   * @param  epnum: endpoint number
   * @retval status
   */
 static uint8_t  USBD_CDC_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
+{
  8004b6e:	b580      	push	{r7, lr}
  8004b70:	b084      	sub	sp, #16
  8004b72:	af00      	add	r7, sp, #0
  8004b74:	6078      	str	r0, [r7, #4]
  8004b76:	460b      	mov	r3, r1
  8004b78:	70fb      	strb	r3, [r7, #3]
-{
+  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
  8004b7a:	687b      	ldr	r3, [r7, #4]
  8004b7c:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004b80:	60fb      	str	r3, [r7, #12]
-  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
 
   /* Get the received data length */
+  hcdc->RxLength = USBD_LL_GetRxDataSize(pdev, epnum);
  8004b82:	78fb      	ldrb	r3, [r7, #3]
  8004b84:	4619      	mov	r1, r3
  8004b86:	6878      	ldr	r0, [r7, #4]
@@ -12614,16 +12614,16 @@ static uint8_t  USBD_CDC_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
  8004b8c:	4602      	mov	r2, r0
  8004b8e:	68fb      	ldr	r3, [r7, #12]
  8004b90:	f8c3 220c 	str.w	r2, [r3, #524]	; 0x20c
-  hcdc->RxLength = USBD_LL_GetRxDataSize(pdev, epnum);
 
   /* USB data will be immediately processed, this allow next USB traffic being
   NAKed till the end of the application Xfer */
+  if (pdev->pClassData != NULL)
  8004b94:	687b      	ldr	r3, [r7, #4]
  8004b96:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004b9a:	2b00      	cmp	r3, #0
  8004b9c:	d00d      	beq.n	8004bba <USBD_CDC_DataOut+0x4c>
-  if (pdev->pClassData != NULL)
   {
+    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Receive(hcdc->RxBuffer, &hcdc->RxLength);
  8004b9e:	687b      	ldr	r3, [r7, #4]
  8004ba0:	f8d3 32bc 	ldr.w	r3, [r3, #700]	; 0x2bc
  8004ba4:	68db      	ldr	r3, [r3, #12]
@@ -12633,39 +12633,39 @@ static uint8_t  USBD_CDC_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
  8004bae:	f502 7203 	add.w	r2, r2, #524	; 0x20c
  8004bb2:	4611      	mov	r1, r2
  8004bb4:	4798      	blx	r3
-    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Receive(hcdc->RxBuffer, &hcdc->RxLength);
 
+    return USBD_OK;
  8004bb6:	2300      	movs	r3, #0
  8004bb8:	e000      	b.n	8004bbc <USBD_CDC_DataOut+0x4e>
-    return USBD_OK;
   }
   else
   {
- 8004bba:	2302      	movs	r3, #2
     return USBD_FAIL;
+ 8004bba:	2302      	movs	r3, #2
   }
+}
  8004bbc:	4618      	mov	r0, r3
  8004bbe:	3710      	adds	r7, #16
  8004bc0:	46bd      	mov	sp, r7
  8004bc2:	bd80      	pop	{r7, pc}
 
 08004bc4 <USBD_CDC_EP0_RxReady>:
-  * @brief  USBD_CDC_EP0_RxReady
   *         Handle EP0 Rx Ready event
   * @param  pdev: device instance
   * @retval status
   */
 static uint8_t  USBD_CDC_EP0_RxReady(USBD_HandleTypeDef *pdev)
+{
  8004bc4:	b580      	push	{r7, lr}
  8004bc6:	b084      	sub	sp, #16
  8004bc8:	af00      	add	r7, sp, #0
  8004bca:	6078      	str	r0, [r7, #4]
-{
+  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
  8004bcc:	687b      	ldr	r3, [r7, #4]
  8004bce:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004bd2:	60fb      	str	r3, [r7, #12]
-  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
 
+  if ((pdev->pUserData != NULL) && (hcdc->CmdOpCode != 0xFFU))
  8004bd4:	687b      	ldr	r3, [r7, #4]
  8004bd6:	f8d3 32bc 	ldr.w	r3, [r3, #700]	; 0x2bc
  8004bda:	2b00      	cmp	r3, #0
@@ -12674,53 +12674,53 @@ static uint8_t  USBD_CDC_EP0_RxReady(USBD_HandleTypeDef *pdev)
  8004be0:	f893 3200 	ldrb.w	r3, [r3, #512]	; 0x200
  8004be4:	2bff      	cmp	r3, #255	; 0xff
  8004be6:	d010      	beq.n	8004c0a <USBD_CDC_EP0_RxReady+0x46>
-  if ((pdev->pUserData != NULL) && (hcdc->CmdOpCode != 0xFFU))
   {
+    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Control(hcdc->CmdOpCode,
  8004be8:	687b      	ldr	r3, [r7, #4]
  8004bea:	f8d3 32bc 	ldr.w	r3, [r3, #700]	; 0x2bc
  8004bee:	689b      	ldr	r3, [r3, #8]
  8004bf0:	68fa      	ldr	r2, [r7, #12]
  8004bf2:	f892 0200 	ldrb.w	r0, [r2, #512]	; 0x200
-    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Control(hcdc->CmdOpCode,
- 8004bf6:	68f9      	ldr	r1, [r7, #12]
                                                       (uint8_t *)(void *)hcdc->data,
+ 8004bf6:	68f9      	ldr	r1, [r7, #12]
+                                                      (uint16_t)hcdc->CmdLength);
  8004bf8:	68fa      	ldr	r2, [r7, #12]
  8004bfa:	f892 2201 	ldrb.w	r2, [r2, #513]	; 0x201
-  {
+    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Control(hcdc->CmdOpCode,
  8004bfe:	b292      	uxth	r2, r2
  8004c00:	4798      	blx	r3
-                                                      (uint16_t)hcdc->CmdLength);
+    hcdc->CmdOpCode = 0xFFU;
  8004c02:	68fb      	ldr	r3, [r7, #12]
  8004c04:	22ff      	movs	r2, #255	; 0xff
  8004c06:	f883 2200 	strb.w	r2, [r3, #512]	; 0x200
-    hcdc->CmdOpCode = 0xFFU;
 
   }
- 8004c0a:	2300      	movs	r3, #0
   return USBD_OK;
+ 8004c0a:	2300      	movs	r3, #0
+}
  8004c0c:	4618      	mov	r0, r3
  8004c0e:	3710      	adds	r7, #16
  8004c10:	46bd      	mov	sp, r7
  8004c12:	bd80      	pop	{r7, pc}
 
 08004c14 <USBD_CDC_GetFSCfgDesc>:
-  *         Return configuration descriptor
   * @param  speed : current device speed
   * @param  length : pointer data length
   * @retval pointer to descriptor buffer
   */
 static uint8_t  *USBD_CDC_GetFSCfgDesc(uint16_t *length)
+{
  8004c14:	b480      	push	{r7}
  8004c16:	b083      	sub	sp, #12
  8004c18:	af00      	add	r7, sp, #0
  8004c1a:	6078      	str	r0, [r7, #4]
-{
+  *length = sizeof(USBD_CDC_CfgFSDesc);
  8004c1c:	687b      	ldr	r3, [r7, #4]
  8004c1e:	2243      	movs	r2, #67	; 0x43
  8004c20:	801a      	strh	r2, [r3, #0]
-  *length = sizeof(USBD_CDC_CfgFSDesc);
- 8004c22:	4b03      	ldr	r3, [pc, #12]	; (8004c30 <USBD_CDC_GetFSCfgDesc+0x1c>)
   return USBD_CDC_CfgFSDesc;
+ 8004c22:	4b03      	ldr	r3, [pc, #12]	; (8004c30 <USBD_CDC_GetFSCfgDesc+0x1c>)
+}
  8004c24:	4618      	mov	r0, r3
  8004c26:	370c      	adds	r7, #12
  8004c28:	46bd      	mov	sp, r7
@@ -12730,23 +12730,23 @@ static uint8_t  *USBD_CDC_GetFSCfgDesc(uint16_t *length)
  8004c30:	2000009c 	.word	0x2000009c
 
 08004c34 <USBD_CDC_GetHSCfgDesc>:
-  *         Return configuration descriptor
   * @param  speed : current device speed
   * @param  length : pointer data length
   * @retval pointer to descriptor buffer
   */
 static uint8_t  *USBD_CDC_GetHSCfgDesc(uint16_t *length)
+{
  8004c34:	b480      	push	{r7}
  8004c36:	b083      	sub	sp, #12
  8004c38:	af00      	add	r7, sp, #0
  8004c3a:	6078      	str	r0, [r7, #4]
-{
+  *length = sizeof(USBD_CDC_CfgHSDesc);
  8004c3c:	687b      	ldr	r3, [r7, #4]
  8004c3e:	2243      	movs	r2, #67	; 0x43
  8004c40:	801a      	strh	r2, [r3, #0]
-  *length = sizeof(USBD_CDC_CfgHSDesc);
- 8004c42:	4b03      	ldr	r3, [pc, #12]	; (8004c50 <USBD_CDC_GetHSCfgDesc+0x1c>)
   return USBD_CDC_CfgHSDesc;
+ 8004c42:	4b03      	ldr	r3, [pc, #12]	; (8004c50 <USBD_CDC_GetHSCfgDesc+0x1c>)
+}
  8004c44:	4618      	mov	r0, r3
  8004c46:	370c      	adds	r7, #12
  8004c48:	46bd      	mov	sp, r7
@@ -12756,23 +12756,23 @@ static uint8_t  *USBD_CDC_GetHSCfgDesc(uint16_t *length)
  8004c50:	20000058 	.word	0x20000058
 
 08004c54 <USBD_CDC_GetOtherSpeedCfgDesc>:
-  *         Return configuration descriptor
   * @param  speed : current device speed
   * @param  length : pointer data length
   * @retval pointer to descriptor buffer
   */
 static uint8_t  *USBD_CDC_GetOtherSpeedCfgDesc(uint16_t *length)
+{
  8004c54:	b480      	push	{r7}
  8004c56:	b083      	sub	sp, #12
  8004c58:	af00      	add	r7, sp, #0
  8004c5a:	6078      	str	r0, [r7, #4]
-{
+  *length = sizeof(USBD_CDC_OtherSpeedCfgDesc);
  8004c5c:	687b      	ldr	r3, [r7, #4]
  8004c5e:	2243      	movs	r2, #67	; 0x43
  8004c60:	801a      	strh	r2, [r3, #0]
-  *length = sizeof(USBD_CDC_OtherSpeedCfgDesc);
- 8004c62:	4b03      	ldr	r3, [pc, #12]	; (8004c70 <USBD_CDC_GetOtherSpeedCfgDesc+0x1c>)
   return USBD_CDC_OtherSpeedCfgDesc;
+ 8004c62:	4b03      	ldr	r3, [pc, #12]	; (8004c70 <USBD_CDC_GetOtherSpeedCfgDesc+0x1c>)
+}
  8004c64:	4618      	mov	r0, r3
  8004c66:	370c      	adds	r7, #12
  8004c68:	46bd      	mov	sp, r7
@@ -12782,23 +12782,23 @@ static uint8_t  *USBD_CDC_GetOtherSpeedCfgDesc(uint16_t *length)
  8004c70:	200000e0 	.word	0x200000e0
 
 08004c74 <USBD_CDC_GetDeviceQualifierDescriptor>:
-* @brief  DeviceQualifierDescriptor
 *         return Device Qualifier descriptor
 * @param  length : pointer data length
 * @retval pointer to descriptor buffer
 */
 uint8_t  *USBD_CDC_GetDeviceQualifierDescriptor(uint16_t *length)
+{
  8004c74:	b480      	push	{r7}
  8004c76:	b083      	sub	sp, #12
  8004c78:	af00      	add	r7, sp, #0
  8004c7a:	6078      	str	r0, [r7, #4]
-{
+  *length = sizeof(USBD_CDC_DeviceQualifierDesc);
  8004c7c:	687b      	ldr	r3, [r7, #4]
  8004c7e:	220a      	movs	r2, #10
  8004c80:	801a      	strh	r2, [r3, #0]
-  *length = sizeof(USBD_CDC_DeviceQualifierDesc);
- 8004c82:	4b03      	ldr	r3, [pc, #12]	; (8004c90 <USBD_CDC_GetDeviceQualifierDescriptor+0x1c>)
   return USBD_CDC_DeviceQualifierDesc;
+ 8004c82:	4b03      	ldr	r3, [pc, #12]	; (8004c90 <USBD_CDC_GetDeviceQualifierDescriptor+0x1c>)
+}
  8004c84:	4618      	mov	r0, r3
  8004c86:	370c      	adds	r7, #12
  8004c88:	46bd      	mov	sp, r7
@@ -12808,38 +12808,38 @@ uint8_t  *USBD_CDC_GetDeviceQualifierDescriptor(uint16_t *length)
  8004c90:	20000014 	.word	0x20000014
 
 08004c94 <USBD_CDC_RegisterInterface>:
-  * @param  pdev: device instance
   * @param  fops: CD  Interface callback
   * @retval status
   */
 uint8_t  USBD_CDC_RegisterInterface(USBD_HandleTypeDef   *pdev,
                                     USBD_CDC_ItfTypeDef *fops)
+{
  8004c94:	b480      	push	{r7}
  8004c96:	b085      	sub	sp, #20
  8004c98:	af00      	add	r7, sp, #0
  8004c9a:	6078      	str	r0, [r7, #4]
  8004c9c:	6039      	str	r1, [r7, #0]
-{
+  uint8_t  ret = USBD_FAIL;
  8004c9e:	2302      	movs	r3, #2
  8004ca0:	73fb      	strb	r3, [r7, #15]
-  uint8_t  ret = USBD_FAIL;
 
+  if (fops != NULL)
  8004ca2:	683b      	ldr	r3, [r7, #0]
  8004ca4:	2b00      	cmp	r3, #0
  8004ca6:	d005      	beq.n	8004cb4 <USBD_CDC_RegisterInterface+0x20>
-  if (fops != NULL)
   {
+    pdev->pUserData = fops;
  8004ca8:	687b      	ldr	r3, [r7, #4]
  8004caa:	683a      	ldr	r2, [r7, #0]
  8004cac:	f8c3 22bc 	str.w	r2, [r3, #700]	; 0x2bc
-    pdev->pUserData = fops;
+    ret = USBD_OK;
  8004cb0:	2300      	movs	r3, #0
  8004cb2:	73fb      	strb	r3, [r7, #15]
-    ret = USBD_OK;
   }
 
- 8004cb4:	7bfb      	ldrb	r3, [r7, #15]
   return ret;
+ 8004cb4:	7bfb      	ldrb	r3, [r7, #15]
+}
  8004cb6:	4618      	mov	r0, r3
  8004cb8:	3714      	adds	r7, #20
  8004cba:	46bd      	mov	sp, r7
@@ -12847,12 +12847,12 @@ uint8_t  USBD_CDC_RegisterInterface(USBD_HandleTypeDef   *pdev,
  8004cbe:	4770      	bx	lr
 
 08004cc0 <USBD_CDC_SetTxBuffer>:
-  * @param  pbuff: Tx Buffer
   * @retval status
   */
 uint8_t  USBD_CDC_SetTxBuffer(USBD_HandleTypeDef   *pdev,
                               uint8_t  *pbuff,
                               uint16_t length)
+{
  8004cc0:	b480      	push	{r7}
  8004cc2:	b087      	sub	sp, #28
  8004cc4:	af00      	add	r7, sp, #0
@@ -12860,23 +12860,23 @@ uint8_t  USBD_CDC_SetTxBuffer(USBD_HandleTypeDef   *pdev,
  8004cc8:	60b9      	str	r1, [r7, #8]
  8004cca:	4613      	mov	r3, r2
  8004ccc:	80fb      	strh	r3, [r7, #6]
-{
+  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
  8004cce:	68fb      	ldr	r3, [r7, #12]
  8004cd0:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004cd4:	617b      	str	r3, [r7, #20]
-  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
 
+  hcdc->TxBuffer = pbuff;
  8004cd6:	697b      	ldr	r3, [r7, #20]
  8004cd8:	68ba      	ldr	r2, [r7, #8]
  8004cda:	f8c3 2208 	str.w	r2, [r3, #520]	; 0x208
-  hcdc->TxBuffer = pbuff;
+  hcdc->TxLength = length;
  8004cde:	88fa      	ldrh	r2, [r7, #6]
  8004ce0:	697b      	ldr	r3, [r7, #20]
  8004ce2:	f8c3 2210 	str.w	r2, [r3, #528]	; 0x210
-  hcdc->TxLength = length;
 
- 8004ce6:	2300      	movs	r3, #0
   return USBD_OK;
+ 8004ce6:	2300      	movs	r3, #0
+}
  8004ce8:	4618      	mov	r0, r3
  8004cea:	371c      	adds	r7, #28
  8004cec:	46bd      	mov	sp, r7
@@ -12884,30 +12884,30 @@ uint8_t  USBD_CDC_SetTxBuffer(USBD_HandleTypeDef   *pdev,
  8004cf0:	4770      	bx	lr
 
 08004cf2 <USBD_CDC_SetRxBuffer>:
-  * @param  pdev: device instance
   * @param  pbuff: Rx Buffer
   * @retval status
   */
 uint8_t  USBD_CDC_SetRxBuffer(USBD_HandleTypeDef   *pdev,
                               uint8_t  *pbuff)
+{
  8004cf2:	b480      	push	{r7}
  8004cf4:	b085      	sub	sp, #20
  8004cf6:	af00      	add	r7, sp, #0
  8004cf8:	6078      	str	r0, [r7, #4]
  8004cfa:	6039      	str	r1, [r7, #0]
-{
+  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
  8004cfc:	687b      	ldr	r3, [r7, #4]
  8004cfe:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004d02:	60fb      	str	r3, [r7, #12]
-  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
 
+  hcdc->RxBuffer = pbuff;
  8004d04:	68fb      	ldr	r3, [r7, #12]
  8004d06:	683a      	ldr	r2, [r7, #0]
  8004d08:	f8c3 2204 	str.w	r2, [r3, #516]	; 0x204
-  hcdc->RxBuffer = pbuff;
 
- 8004d0c:	2300      	movs	r3, #0
   return USBD_OK;
+ 8004d0c:	2300      	movs	r3, #0
+}
  8004d0e:	4618      	mov	r0, r3
  8004d10:	3714      	adds	r7, #20
  8004d12:	46bd      	mov	sp, r7
@@ -12915,112 +12915,112 @@ uint8_t  USBD_CDC_SetRxBuffer(USBD_HandleTypeDef   *pdev,
  8004d16:	4770      	bx	lr
 
 08004d18 <USBD_CDC_TransmitPacket>:
-  * @brief  USBD_CDC_TransmitPacket
   *         Transmit packet on IN endpoint
   * @param  pdev: device instance
   * @retval status
   */
 uint8_t  USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev)
+{
  8004d18:	b580      	push	{r7, lr}
  8004d1a:	b084      	sub	sp, #16
  8004d1c:	af00      	add	r7, sp, #0
  8004d1e:	6078      	str	r0, [r7, #4]
-{
+  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
  8004d20:	687b      	ldr	r3, [r7, #4]
  8004d22:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004d26:	60fb      	str	r3, [r7, #12]
-  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
 
+  if (pdev->pClassData != NULL)
  8004d28:	687b      	ldr	r3, [r7, #4]
  8004d2a:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004d2e:	2b00      	cmp	r3, #0
  8004d30:	d01c      	beq.n	8004d6c <USBD_CDC_TransmitPacket+0x54>
-  if (pdev->pClassData != NULL)
   {
+    if (hcdc->TxState == 0U)
  8004d32:	68fb      	ldr	r3, [r7, #12]
  8004d34:	f8d3 3214 	ldr.w	r3, [r3, #532]	; 0x214
  8004d38:	2b00      	cmp	r3, #0
  8004d3a:	d115      	bne.n	8004d68 <USBD_CDC_TransmitPacket+0x50>
-    if (hcdc->TxState == 0U)
     {
       /* Tx Transfer in progress */
+      hcdc->TxState = 1U;
  8004d3c:	68fb      	ldr	r3, [r7, #12]
  8004d3e:	2201      	movs	r2, #1
  8004d40:	f8c3 2214 	str.w	r2, [r3, #532]	; 0x214
-      hcdc->TxState = 1U;
 
       /* Update the packet total length */
+      pdev->ep_in[CDC_IN_EP & 0xFU].total_length = hcdc->TxLength;
  8004d44:	68fb      	ldr	r3, [r7, #12]
  8004d46:	f8d3 2210 	ldr.w	r2, [r3, #528]	; 0x210
  8004d4a:	687b      	ldr	r3, [r7, #4]
  8004d4c:	631a      	str	r2, [r3, #48]	; 0x30
-      pdev->ep_in[CDC_IN_EP & 0xFU].total_length = hcdc->TxLength;
 
       /* Transmit next packet */
+      USBD_LL_Transmit(pdev, CDC_IN_EP, hcdc->TxBuffer,
  8004d4e:	68fb      	ldr	r3, [r7, #12]
  8004d50:	f8d3 2208 	ldr.w	r2, [r3, #520]	; 0x208
-      USBD_LL_Transmit(pdev, CDC_IN_EP, hcdc->TxBuffer,
+                       (uint16_t)hcdc->TxLength);
  8004d54:	68fb      	ldr	r3, [r7, #12]
  8004d56:	f8d3 3210 	ldr.w	r3, [r3, #528]	; 0x210
-      /* Transmit next packet */
+      USBD_LL_Transmit(pdev, CDC_IN_EP, hcdc->TxBuffer,
  8004d5a:	b29b      	uxth	r3, r3
  8004d5c:	2181      	movs	r1, #129	; 0x81
  8004d5e:	6878      	ldr	r0, [r7, #4]
  8004d60:	f001 fcbe 	bl	80066e0 <USBD_LL_Transmit>
-                       (uint16_t)hcdc->TxLength);
 
+      return USBD_OK;
  8004d64:	2300      	movs	r3, #0
  8004d66:	e002      	b.n	8004d6e <USBD_CDC_TransmitPacket+0x56>
-      return USBD_OK;
     }
     else
     {
+      return USBD_BUSY;
  8004d68:	2301      	movs	r3, #1
  8004d6a:	e000      	b.n	8004d6e <USBD_CDC_TransmitPacket+0x56>
-      return USBD_BUSY;
     }
   }
   else
   {
- 8004d6c:	2302      	movs	r3, #2
     return USBD_FAIL;
+ 8004d6c:	2302      	movs	r3, #2
   }
+}
  8004d6e:	4618      	mov	r0, r3
  8004d70:	3710      	adds	r7, #16
  8004d72:	46bd      	mov	sp, r7
  8004d74:	bd80      	pop	{r7, pc}
 
 08004d76 <USBD_CDC_ReceivePacket>:
-  * @brief  USBD_CDC_ReceivePacket
   *         prepare OUT Endpoint for reception
   * @param  pdev: device instance
   * @retval status
   */
 uint8_t  USBD_CDC_ReceivePacket(USBD_HandleTypeDef *pdev)
+{
  8004d76:	b580      	push	{r7, lr}
  8004d78:	b084      	sub	sp, #16
  8004d7a:	af00      	add	r7, sp, #0
  8004d7c:	6078      	str	r0, [r7, #4]
-{
+  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
  8004d7e:	687b      	ldr	r3, [r7, #4]
  8004d80:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004d84:	60fb      	str	r3, [r7, #12]
-  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
 
   /* Suspend or Resume USB Out process */
+  if (pdev->pClassData != NULL)
  8004d86:	687b      	ldr	r3, [r7, #4]
  8004d88:	f8d3 32b8 	ldr.w	r3, [r3, #696]	; 0x2b8
  8004d8c:	2b00      	cmp	r3, #0
  8004d8e:	d017      	beq.n	8004dc0 <USBD_CDC_ReceivePacket+0x4a>
-  if (pdev->pClassData != NULL)
   {
+    if (pdev->dev_speed == USBD_SPEED_HIGH)
  8004d90:	687b      	ldr	r3, [r7, #4]
  8004d92:	7c1b      	ldrb	r3, [r3, #16]
  8004d94:	2b00      	cmp	r3, #0
  8004d96:	d109      	bne.n	8004dac <USBD_CDC_ReceivePacket+0x36>
-    if (pdev->dev_speed == USBD_SPEED_HIGH)
     {
       /* Prepare Out endpoint to receive next packet */
+      USBD_LL_PrepareReceive(pdev,
  8004d98:	68fb      	ldr	r3, [r7, #12]
  8004d9a:	f8d3 2204 	ldr.w	r2, [r3, #516]	; 0x204
  8004d9e:	f44f 7300 	mov.w	r3, #512	; 0x200
@@ -13028,32 +13028,32 @@ uint8_t  USBD_CDC_ReceivePacket(USBD_HandleTypeDef *pdev)
  8004da4:	6878      	ldr	r0, [r7, #4]
  8004da6:	f001 fcbe 	bl	8006726 <USBD_LL_PrepareReceive>
  8004daa:	e007      	b.n	8004dbc <USBD_CDC_ReceivePacket+0x46>
-                             hcdc->RxBuffer,
                              CDC_DATA_HS_OUT_PACKET_SIZE);
     }
     else
     {
       /* Prepare Out endpoint to receive next packet */
+      USBD_LL_PrepareReceive(pdev,
  8004dac:	68fb      	ldr	r3, [r7, #12]
  8004dae:	f8d3 2204 	ldr.w	r2, [r3, #516]	; 0x204
  8004db2:	2340      	movs	r3, #64	; 0x40
  8004db4:	2101      	movs	r1, #1
  8004db6:	6878      	ldr	r0, [r7, #4]
  8004db8:	f001 fcb5 	bl	8006726 <USBD_LL_PrepareReceive>
-      USBD_LL_PrepareReceive(pdev,
                              CDC_OUT_EP,
                              hcdc->RxBuffer,
                              CDC_DATA_FS_OUT_PACKET_SIZE);
     }
+    return USBD_OK;
  8004dbc:	2300      	movs	r3, #0
  8004dbe:	e000      	b.n	8004dc2 <USBD_CDC_ReceivePacket+0x4c>
-    return USBD_OK;
   }
   else
   {
- 8004dc0:	2302      	movs	r3, #2
     return USBD_FAIL;
+ 8004dc0:	2302      	movs	r3, #2
   }
+}
  8004dc2:	4618      	mov	r0, r3
  8004dc4:	3710      	adds	r7, #16
  8004dc6:	46bd      	mov	sp, r7

@@ -1,0 +1,4 @@
+[X] Fazer a função do init pra habilitar o Auto Ack
+[ ] Adaptar a função de transmitir pra ligar o AACK
+[ ] Colocar um if pra tratar a IRQ de MAX_RT
+[ ] Ver em que momento tem que configurar o CONFIG pra falar se é PTX ou PRX
