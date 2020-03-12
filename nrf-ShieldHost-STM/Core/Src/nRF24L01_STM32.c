@@ -268,7 +268,7 @@ void init_AA_EN(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t r
     SPI_Write_Reg(RF_SETUP, &rf_setup_byte);     // TX_PWR:0dBm, Datarate:1Mbps, LNA:HCURR
 
 
-    //Transmiter Address.
+    //Transmitter Address.
     SPI_Write_Buf_Reg(TX_ADDR, ADDR_HOST, TX_RX_ADDR_WIDTH);
 
     //Receiver Address - Pipe 0
@@ -294,7 +294,7 @@ void init_AA_EN(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t r
     //SPI_Read_Reg(NRF_STATUS);
 
     //Default: Stay in RX Mode waiting for data from MIP
-    RX_Mode();
+    RX_Mode_AA_EN();
 
 }
 
@@ -469,6 +469,39 @@ void RX_Mode(void)
   
 }
 
+void RX_Mode_AA_EN(void)
+{
+    //rx_newPayload = 0;
+    status = 0;
+    RX_OK = 0;
+
+    uint8_t config_value = 0x0F; // 0000 1111
+
+    //The RX mode is an active mode where the nRF24L01 radio is a receiver. To enter this mode, the
+    //nRF24L01 must have the PWR_UP bit set high, PRIM_RX bit set high and the CE pin set high.
+
+    //Make sure you set CE = 0 first, so the chip is in Standby mode before you change radio mode.
+    //CE (active high and is used to activate the chip in RX or TX mode) - 0: Desativa o transceiver para programação
+    HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
+
+    //Configurar transceiver para recepção de dados
+    // CONFIG register (nRF24LE01):
+    // b7. Reserved     = 0;
+    // b6. MASK_RX_DR   = 0: Reflect RX_DR as active low on RFIRQ (interrupt)
+    // b5. MASK_TX_DS   = 0: Reflect TX_DS as active low interrupt on RFIRQ
+    // b4. MASK_MAX_RT  = 0: Reflect MAX_RT as active low on RFIRQ
+    // b3. EN_CRC       = 1: Enable CRC - Forced high if one of the bits in the EN_AA is high
+    // b2. CRCO         = 1: CRC encoding 2 bytes
+    // b1. PWR_UP       = 1: POWER UP
+    // b0. PRIM_RX      = 1: RX/TX control with RX (sets the nRF24L01 in transmit/receive)
+    SPI_Write_Reg(CONFIG, &config_value);
+
+    //CE (active high and is used to activate the chip in RX or TX mode) - a: Ativa o transceiver para RX
+    HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_SET);
+
+}
+
+
 /**
  * Function called when an IRQ occurs. After verifying the nRF state it saves the paylod (RX mode) or 
  *  flushes the TX FIFO after a sucessful transmission
@@ -504,6 +537,12 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
         SPI_Write(FLUSH_TX,0); //limpar o buffer TX
     }
     
+    // If the maximum number of retransmissions was reached
+    if(status & MAX_RT)
+    {
+    	// Do nothing
+    }
+
     //Reset status
     uint8_t sta_val = 0x70;
     SPI_Write_Reg(NRF_STATUS, &sta_val);
@@ -517,8 +556,6 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
  */
 void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength)
 {
-	  uint8_t statusReg;
-
 	  TX_OK = 0; //Iniciando transmissão (Na IRQ é setada para 1, indicando fim de transmissão
 
 	  //The TX mode is an active mode where the nRF24L01 transmits a packet.
@@ -532,15 +569,15 @@ void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength)
 
 	  //Configurar transceiver para transmissão de dados
 	  // CONFIG register (nRF24LE01):
-	  // b7. Reserved = 0;
-	  // b6. MASK_RX_DR = 0: Reflect RX_DR as active low on RFIRQ (interrupt)
-	  // b5. MASK_TX_DS = 0: Reflect TX_DS as active low interrupt on RFIRQ
-	  // b4. MASK_MAX_RT = 1: disabled - Reflect MAX_RT as active low on RFIRQ
-	  // b3. EN_CRC = 1: Enable CRC - Forced high if one of the bits in the EN_AA is high
-	  // b2. CRCO = 1: CRC encoding 2 bytes
-	  // b1. PWR_UP = 1: POWER UP
-	  // b0. PRIM_RX = 0: RX/TX control with TX (sets the nRF24L01 in transmit/receive)
-	  uint8_t config = 0x1E;
+	  // b7. Reserved 		= 0;
+	  // b6. MASK_RX_DR 	= 0: Reflect RX_DR as active low on RFIRQ (interrupt)
+	  // b5. MASK_TX_DS 	= 0: Reflect TX_DS as active low interrupt on RFIRQ
+	  // b4. MASK_MAX_RT 	= 1: Disabled - Reflect MAX_RT as active low on RFIRQ
+	  // b3. EN_CRC 		= 1: Enable CRC - Forced high if one of the bits in the EN_AA is high
+	  // b2. CRCO 			= 1: CRC encoding 2 bytes
+	  // b1. PWR_UP 		= 1: POWER UP
+	  // b0. PRIM_RX 		= 0: RX/TX control with TX (sets the nRF24L01 in transmit/receive)
+	  uint8_t config = 0x1E; // 0001 1110
 	  SPI_Write_Reg(CONFIG, &config);
 
 	  //enviar (transmitir) endereço do receptor para o qual a mensagem será enviada (o outro nRF24L01)
@@ -567,4 +604,56 @@ void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength)
 	            //    adicionando os tempos de wakeup etc, teríamos +- 1mseg... vou usar 2mseg por segurança aqui...
 
 	  RX_Mode();
+}
+
+void TX_Mode_AA_EN(uint8_t* buf, uint8_t payloadLength)
+{
+	  TX_OK = 0; //Iniciando transmissão (Na IRQ é setada para 1, indicando fim de transmissão
+
+	  //The TX mode is an active mode where the nRF24L01 transmits a packet.
+	  //To enter this mode, the nRF24L01 must have the PWR_UP bit set high, PRIM_RX bit set low,
+	  //a payload in the TX FIFO and, a high pulse on the CE for more than 10μs.
+
+	  //Make sure you sett CE = 0 first, so the chip is in Standby mode before you change radio mode.
+	  //CE (active high and is used to activate the chip in RX or TX mode) - 0: Desativa o transceiver para programação
+	  HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
+
+
+	  //Configurar transceiver para transmissão de dados
+	  // CONFIG register (nRF24LE01):
+	  // b7. Reserved 		= 0;
+	  // b6. MASK_RX_DR 	= 0: Reflect RX_DR as active low on RFIRQ (interrupt)
+	  // b5. MASK_TX_DS 	= 0: Reflect TX_DS as active low interrupt on RFIRQ
+	  // b4. MASK_MAX_RT 	= 0: Reflect MAX_RT as active low on RFIRQ
+	  // b3. EN_CRC 		= 1: Enable CRC - Forced high if one of the bits in the EN_AA is high
+	  // b2. CRCO 			= 1: CRC encoding 2 bytes
+	  // b1. PWR_UP 		= 1: POWER UP
+	  // b0. PRIM_RX 		= 0: RX/TX control with TX (sets the nRF24L01 in transmit/receive)
+	  uint8_t config = 0x0E; // 0000 1110
+	  SPI_Write_Reg(CONFIG, &config);
+
+	  //enviar (transmitir) endereço do receptor para o qual a mensagem será enviada (o outro nRF24L01)
+	  SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
+
+	  //Envia o payload para o transceiver.
+	  SPI_Write_Buf(W_TX_PAYLOAD_NOACK, buf, payloadLength); // Writes data to TX payload
+
+	//TO DO -- para maior eficiência, implementar transmissão (dois lados do link) com
+	//ACK e Auto-Retransmite... ACK permite uso da interrupção (IRQ) via flag TX_DS...
+
+	  //Iniciar transmissão - ativar TX-RF
+	  // Set CE pin high to enable TX Mode
+	  //	CE (active high and is used to activate the chip in RX or TX mode)
+	  // 	- a: Ativa o transceiver para RX
+	  HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_SET);
+
+	  //Aguardar IRQ indicando que concluiu a transmissão..
+
+	  HAL_Delay(2); //delay suficiente para transmitir o payload maximo de 32 bytes.
+	            //Com data rate de 1Mbps ==> 1us por bit;
+	            //Pacote transmitido: Preambulo (1 byte) + endereço (5bytes) + controle (9bits) + payload (até 32 bytes)
+	            //                    + CRC (2 bytes) ==> Total 329 bits (pacote maximo) ==> ou seja 329useg
+	            //    adicionando os tempos de wakeup etc, teríamos +- 1mseg... vou usar 2mseg por segurança aqui...
+
+	  RX_Mode_AA_EN();
 }

@@ -120,7 +120,7 @@ int main(void)
   nRF24L01_STM32(hspi1); // Set the SPI parameters for the nRF library
 
   // Initiate the nRF with the channel, data rate and tx power parameters
-  init(nRF_Canal, RF_DATA_RATE_1Mbps, RF_TX_POWER_0dBm);
+  init_AA_EN(nRF_Canal, RF_DATA_RATE_1Mbps, RF_TX_POWER_0dBm);
   rx_newPayload = 0;
   nRFint_guard = 1; //Liberar execução da interrupção externa
 
@@ -456,7 +456,7 @@ void rfSendBuffer(uint8_t *buffer2send, uint8_t buffer_size)
     send_index += 1;
   }
   //Enviar via RF
-  TX_Mode_NOACK(tx_buf, send_index);
+  TX_Mode_AA_EN(tx_buf, send_index);
 }
 
 /********** TEST FUNCTIONS **********/
