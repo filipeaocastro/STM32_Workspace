@@ -636,7 +636,7 @@ void TX_Mode_AA_EN(uint8_t* buf, uint8_t payloadLength)
 	  SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
 
 	  //Envia o payload para o transceiver.
-	  SPI_Write_Buf(W_TX_PAYLOAD_NOACK, buf, payloadLength); // Writes data to TX payload
+	  SPI_Write_Buf(W_TX_PAYLOAD, buf, payloadLength); // Writes data to TX payload
 
 	//TO DO -- para maior eficiência, implementar transmissão (dois lados do link) com
 	//ACK e Auto-Retransmite... ACK permite uso da interrupção (IRQ) via flag TX_DS...
