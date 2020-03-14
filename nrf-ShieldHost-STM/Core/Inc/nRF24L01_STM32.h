@@ -128,12 +128,9 @@ GPIO_InitTypeDef RF_IRQ_Pin, GPIO_InitTypeDef RF_IRQ_GPIO_Port);*/
 /* Constructor default */
 void nRF24L01_STM32(SPI_HandleTypeDef spi);
 
-void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr);
-void init_AA_EN(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr);
+void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr, uint8_t autoAck_enable);
 void RX_Mode(void);
-void RX_Mode_AA_EN(void);
-void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength);
-void TX_Mode_AA_EN(uint8_t* buf, uint8_t payloadLength);
+void TX_Mode(uint8_t* buf, uint8_t payloadLength, uint8_t autoAck_enable);
 void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload);
 uint8_t getnRFStatus();
 uint8_t SPI_read2(uint8_t reg);

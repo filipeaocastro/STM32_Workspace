@@ -7,3 +7,5 @@
 [X] Ver se precisa arrumar get_msg_from_Host
 [X] Ver se precisa arrumar rx_task
 [X] Ver se precisa arrumar tx_task
+[X] Ver se precisa mudar mesmo o RX_mode (excluído RX_mode_AA_EN, era redundante)
+[X] Colocar if nas funções e excluir TX_mode_AA_EN e init_AA_EN

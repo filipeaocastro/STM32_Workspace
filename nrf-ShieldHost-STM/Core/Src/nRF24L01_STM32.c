@@ -57,18 +57,18 @@ void nRF24L01_STM32(SPI_HandleTypeDef spi)
  * @param rf_pwr		The radio's power in dB
  */
 
-void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
+void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr, uint8_t autoAck_enable)
 {
-    // Setup values of the registers
-    uint8_t rf_setup_byte;
-    uint8_t setup_aw_value = 0x03;
-    uint8_t en_aa_value = 0x00;
-    uint8_t en_rxaddr_value = 0x01;
-    uint8_t setup_retr_value = 0x00;
-    uint8_t dypnd_value = 0x01;
-    uint8_t feature_value = 0x07;
-    uint8_t zero = 0x00;
-    uint8_t nrf_status_value = 0x07;
+	// Setup values of the registers
+	uint8_t rf_setup_byte;
+	uint8_t setup_aw_value = 0x03;	//Setup of Address Widths ('11' - 5 bytes)
+	uint8_t en_aa_value;			//Auto Acknowledgment Function on pipe 0
+	uint8_t en_rxaddr_value = 0x01;	//Enabled RX Addresses (only pipe 0)
+	uint8_t setup_retr_value;		//Setup of Automatic Retransmission
+	uint8_t dypnd_value = 0x01;		//Enable dynamic payload length
+	uint8_t feature_value = 0x05;	//Feature Register
+	uint8_t zero = 0x00;			// 0 (0) (2*5 - 11 + 1)
+	uint8_t nrf_status_value = 0x07;// Status
 
     //uint8_t addr_host[TX_RX_ADDR_WIDTH] = {0xE7,0xE7,0xE7,0xE7,0xE7};
 
@@ -94,15 +94,33 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
     // SETUP_AW register: Setup of Address Widths - (common for all data pipes)  
     SPI_Write_Reg(SETUP_AW, &setup_aw_value); //RX/TX Address field width 5 bytes
     // Configuration register é definido quando entra no modo RX ou TX (ver funções para cada modo)
-    
-    // EN_AA register: Disable Auto Acknowledgment
-    SPI_Write_Reg(EN_AA, &en_aa_value);        // Disable Auto Acknowledgment: All pipes
 
     // EN_RXADDR register: Enable Pipe0 (only pipe0)
     SPI_Write_Reg(EN_RXADDR, &en_rxaddr_value);    // Enable Pipe0 (only pipe0)
 
-    // SETUP_RETR register: Time to automatic retransmition selected: 250us, retransmition disabled
-    SPI_Write_Reg(SETUP_RETR, &setup_retr_value);
+    if(autoAck_enable)
+    {
+    	en_aa_value = 0x01;			// Enabled Auto Acknowledgment
+		setup_retr_value = 0x05;	// Enabled retransmission (5 max)
+
+    	// EN_AA register: Enable Auto Acknowledgment: Pipe 0
+    	SPI_Write_Reg(EN_AA, &en_aa_value);
+
+    	// SETUP_RETR register: Time to automatic retransmission selected: 250us, retransmission enabled
+		SPI_Write_Reg(SETUP_RETR, &setup_retr_value);
+    }
+    else
+    {
+    	en_aa_value = 0x00;			// Disabled Auto Acknowledgment
+		setup_retr_value = 0x00;	// Disabled retransmission (5 max)
+
+    	// EN_AA register: Disable Auto Acknowledgment
+		SPI_Write_Reg(EN_AA, &en_aa_value);        // Disable Auto Acknowledgment: All pipes
+
+		// SETUP_RETR register: Time to automatic retransmission selected: 250us, retransmission disabled
+		SPI_Write_Reg(SETUP_RETR, &setup_retr_value);
+    }
+
 
     // RF_CH register: Select RF channel
     SPI_Write_Reg(RF_CH, &rf_channel);          // Select RF channel: Fo = 2,490 GHz + rf_channel
@@ -144,10 +162,10 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
             rf_setup_byte |= 0x08;//0000 1000
         break;
         }
+
     //Bit 4: PLL_LOCK = 0; bits 7:5 = Reserved = 000
     rf_setup_byte &= 0x0F;//0000 1111
     SPI_Write_Reg(RF_SETUP, &rf_setup_byte);     // TX_PWR:0dBm, Datarate:1Mbps, LNA:HCURR
-
 
     //Transmiter Address.
     SPI_Write_Buf_Reg(TX_ADDR, ADDR_HOST, TX_RX_ADDR_WIDTH);
@@ -169,132 +187,8 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
     // Writes in the STATUS register
     SPI_Write_Reg(NRF_STATUS, &nrf_status_value);
 
-    //SPI_Read_Reg(NRF_STATUS);
-
     //Default: Stay in RX Mode waiting for data from MIP
     RX_Mode();
-
-}
-
-void init_AA_EN(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr)
-{
-    // Setup values of the registers
-    uint8_t rf_setup_byte;
-    uint8_t setup_aw_value = 0x03;	//Setup of Address Widths ('11' - 5 bytes)
-    uint8_t en_aa_value = 0x01;		//Enable ‘Auto Acknowledgment’ Function on pipe 0
-    uint8_t en_rxaddr_value = 0x01;	//Enabled RX Addresses (only pipe 0)
-    uint8_t setup_retr_value = 0x05;//Setup of Automatic Retransmission (up to 5 retransmissions)
-    uint8_t dypnd_value = 0x01;		//Enable dynamic payload length
-    uint8_t feature_value = 0x05;	//Feature Register
-    uint8_t zero = 0x00;			// 0
-    uint8_t nrf_status_value = 0x07;// Status
-
-    //uint8_t addr_host[TX_RX_ADDR_WIDTH] = {0xE7,0xE7,0xE7,0xE7,0xE7};
-
-    //Aguardar sequencia de power-up _ start do CI (~12ms)
-    HAL_Delay(20);
-
-    //rx_newPayload = 0;      // Init with no new payload
-    //rx_payloadWidth = 0;    // It has no length
-    status = 0;             // Stores the STATUS register status
-    TX_OK = 0;              // initiates in stand-by
-    RX_OK = 0;              // "
-
-    // Set CSN high, no SPI transaction yet
-    HAL_GPIO_WritePin(_RF_CSN_GPIO_Port, _RF_CSN_Pin, GPIO_PIN_SET);
-
-    // Disable RX TX
-    HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
-
-    //Configuração:
-
-    //W_REGISTER=001A AAAA: Read command and status registers. AAAAA = 5 bit Register Map Address
-
-    // SETUP_AW register: Setup of Address Widths - (common for all data pipes)
-    SPI_Write_Reg(SETUP_AW, &setup_aw_value); //RX/TX Address field width 5 bytes
-    // Configuration register é definido quando entra no modo RX ou TX (ver funções para cada modo)
-
-    // EN_AA register: Enable Auto Acknowledgment: Pipe 0
-    SPI_Write_Reg(EN_AA, &en_aa_value);
-
-    // EN_RXADDR register: Enable Pipe0 (only pipe 0)
-    SPI_Write_Reg(EN_RXADDR, &en_rxaddr_value);
-
-    // SETUP_RETR register: Time to automatic retransmission selected: 250us, retransmission enabled
-    SPI_Write_Reg(SETUP_RETR, &setup_retr_value);
-
-    // RF_CH register: Select RF channel
-    SPI_Write_Reg(RF_CH, &rf_channel);	// Select RF channel: Fo = 2,490 GHz + rf_channel
-
-    //RF SETUP
-    //Ajustar potência de saída em modo TX (bits 2:1)
-    //  bit 0 = 1 (setup LNA gain)
-    rf_setup_byte = 0x01; //0000 0001
-    switch (rf_pwr)
-    {
-        case RF_TX_POWER_NEGATIVE_18dBm: //bits 2:1 = 00
-            rf_setup_byte &= 0xF9; //1111 1001
-        break;
-
-        case RF_TX_POWER_NEGATIVE_12dBm: //bits 2:1 = 01
-            rf_setup_byte |= 0x02;//0000 0010
-            rf_setup_byte &= 0xFB;//1111 1011
-        break;
-
-        case RF_TX_POWER_NEGATIVE_6dBm: //bits 2:1 = 10
-            rf_setup_byte &= 0xFD;//1111 1101
-            rf_setup_byte |= 0x04;//0000 0100
-        break;
-
-        case RF_TX_POWER_0dBm: //bits 2:1 = 11
-            rf_setup_byte |= 0x06;//0000 0110
-        break;
-
-        default:
-        break;
-    }
-        //Ajustar Air Data Rate (bit 3)
-        switch (rf_data_rate)
-        {
-        case RF_DATA_RATE_1Mbps: //bit 3 = 0
-            rf_setup_byte &= 0xF7;//1111 0111
-        break;
-        case RF_DATA_RATE_2Mbps: //bit 3 = 1
-            rf_setup_byte |= 0x08;//0000 1000
-        break;
-        }
-    //Bit 4: PLL_LOCK = 0; bits 7:5 = Reserved = 000
-    rf_setup_byte &= 0x0F;//0000 1111
-    SPI_Write_Reg(RF_SETUP, &rf_setup_byte);     // TX_PWR:0dBm, Datarate:1Mbps, LNA:HCURR
-
-
-    //Transmitter Address.
-    SPI_Write_Buf_Reg(TX_ADDR, ADDR_HOST, TX_RX_ADDR_WIDTH);
-
-    //Receiver Address - Pipe 0
-    SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
-
-    // Ativa Payload dinâmico em data pipe 0
-    SPI_Write_Reg(DYNPD, &dypnd_value);
-
-    // Ativa Payload dinâmico, ACK sem payload e comando W_TX_PAY
-    SPI_Write_Reg(FEATURE, &feature_value);
-
-    //After the packet is validated, Enhanched ShockBurst™ disassembles the packet and loads the payload into
-    //the RX FIFO, and assert the RX_DR IRQ (active low)
-    //A interrupção é associada ao handler RF_IRQ (nesta classe), no código principal (rf_shield_Host.cpp).
-
-    // Clears the TX and RX FIFO
-    SPI_Write(FLUSH_TX, &zero);
-    SPI_Write(FLUSH_RX, &zero);
-
-    // Writes in the STATUS register
-    SPI_Write_Reg(NRF_STATUS, &nrf_status_value);
-
-    //SPI_Read_Reg(NRF_STATUS);
-
-    //Default: Stay in RX Mode waiting for data from MIP
-    RX_Mode_AA_EN();
 
 }
 
@@ -469,45 +363,15 @@ void RX_Mode(void)
   
 }
 
-void RX_Mode_AA_EN(void)
-{
-    //rx_newPayload = 0;
-    status = 0;
-    RX_OK = 0;
-
-    uint8_t config_value = 0x0F; // 0000 1111
-
-    //The RX mode is an active mode where the nRF24L01 radio is a receiver. To enter this mode, the
-    //nRF24L01 must have the PWR_UP bit set high, PRIM_RX bit set high and the CE pin set high.
-
-    //Make sure you set CE = 0 first, so the chip is in Standby mode before you change radio mode.
-    //CE (active high and is used to activate the chip in RX or TX mode) - 0: Desativa o transceiver para programação
-    HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
-
-    //Configurar transceiver para recepção de dados
-    // CONFIG register (nRF24LE01):
-    // b7. Reserved     = 0;
-    // b6. MASK_RX_DR   = 0: Reflect RX_DR as active low on RFIRQ (interrupt)
-    // b5. MASK_TX_DS   = 0: Reflect TX_DS as active low interrupt on RFIRQ
-    // b4. MASK_MAX_RT  = 0: Reflect MAX_RT as active low on RFIRQ
-    // b3. EN_CRC       = 1: Enable CRC - Forced high if one of the bits in the EN_AA is high
-    // b2. CRCO         = 1: CRC encoding 2 bytes
-    // b1. PWR_UP       = 1: POWER UP
-    // b0. PRIM_RX      = 1: RX/TX control with RX (sets the nRF24L01 in transmit/receive)
-    SPI_Write_Reg(CONFIG, &config_value);
-
-    //CE (active high and is used to activate the chip in RX or TX mode) - a: Ativa o transceiver para RX
-    HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_SET);
-
-}
-
 
 /**
  * Function called when an IRQ occurs. After verifying the nRF state it saves the paylod (RX mode) or 
- *  flushes the TX FIFO after a sucessful transmission
+ *  flushes the TX FIFO after a successful transmission
  **/
 void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
 {
+	HAL_Delay(1); // Delay to give NRf time to transmit the ACK packet
+
     // Read STATUS register
     status = SPI_Read_Status();
 
@@ -520,12 +384,12 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
         *size = SPI_Read(R_RX_PLD_WIDTH);  // Retorna o número de bytes no payload recebido
         SPI_Read_Buf(R_RX_PAYLOAD, buf, *size);  // read receive payload from RX_FIFO buffer
 
-        //if(*size > 32)  //Não pode conter mais que 32 bytes
-        //{
-        //    *size = 0;
-        //}
+        if(*size > 32)  //Não pode conter mais que 32 bytes
+        {
+            *size = 0;
+        }
         SPI_Write(FLUSH_RX, 0x00); //Limpar o buffer RX (os dados recebidos estão em rx_buf).
-        //*size = 1; //indicar que um novo payload está disponível em rx_buf
+
         *newPayload = 1;
     }
 
@@ -554,9 +418,10 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
  * @param buf The payload to be transmitted
  * @param payloadLength The payload's length
  */
-void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength)
+
+void TX_Mode(uint8_t* buf, uint8_t payloadLength, uint8_t autoAck_enabled)
 {
-	  TX_OK = 0; //Iniciando transmissão (Na IRQ é setada para 1, indicando fim de transmissão
+	  TX_OK = 0; //Iniciando transmissão (Na IRQ é setada para 1, indicando fim de transmissão)
 
 	  //The TX mode is an active mode where the nRF24L01 transmits a packet.
 	  //To enter this mode, the nRF24L01 must have the PWR_UP bit set high, PRIM_RX bit set low,
@@ -572,22 +437,33 @@ void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength)
 	  // b7. Reserved 		= 0;
 	  // b6. MASK_RX_DR 	= 0: Reflect RX_DR as active low on RFIRQ (interrupt)
 	  // b5. MASK_TX_DS 	= 0: Reflect TX_DS as active low interrupt on RFIRQ
-	  // b4. MASK_MAX_RT 	= 1: Disabled - Reflect MAX_RT as active low on RFIRQ
+	  // b4. MASK_MAX_RT 	= 0 or 1: 0 Reflect MAX_RT as active low on RFIRQ or 1 to disable this IRQ
 	  // b3. EN_CRC 		= 1: Enable CRC - Forced high if one of the bits in the EN_AA is high
 	  // b2. CRCO 			= 1: CRC encoding 2 bytes
 	  // b1. PWR_UP 		= 1: POWER UP
 	  // b0. PRIM_RX 		= 0: RX/TX control with TX (sets the nRF24L01 in transmit/receive)
-	  uint8_t config = 0x1E; // 0001 1110
+	  uint8_t config = 0x0E; // 0000 1110
+
+	  // Disables the MAX_RT IRQ if the Auto Acknowledgment is disabled
+	  if(autoAck_enabled == 0)
+	  {
+		  config |= 0x10; // 0000 1110 | 0001 0000 = 0001 1110
+	  }
+
 	  SPI_Write_Reg(CONFIG, &config);
+
+	  HAL_Delay(2);
 
 	  //enviar (transmitir) endereço do receptor para o qual a mensagem será enviada (o outro nRF24L01)
 	  SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
 
 	  //Envia o payload para o transceiver.
-	  SPI_Write_Buf(W_TX_PAYLOAD_NOACK, buf, payloadLength); // Writes data to TX payload
+	  if(autoAck_enabled)
+		  SPI_Write_Buf(W_TX_PAYLOAD, buf, payloadLength); // Writes data to TX payload
+	  else
+		  SPI_Write_Buf(W_TX_PAYLOAD_NOACK, buf, payloadLength); // Writes data to TX payload without Acknowledgment
 
-	//TO DO -- para maior eficiência, implementar transmissão (dois lados do link) com
-	//ACK e Auto-Retransmite... ACK permite uso da interrupção (IRQ) via flag TX_DS...
+	  HAL_Delay(1);
 
 	  //Iniciar transmissão - ativar TX-RF
 	  // Set CE pin high to enable TX Mode
@@ -604,56 +480,4 @@ void TX_Mode_NOACK(uint8_t* buf, uint8_t payloadLength)
 	            //    adicionando os tempos de wakeup etc, teríamos +- 1mseg... vou usar 2mseg por segurança aqui...
 
 	  RX_Mode();
-}
-
-void TX_Mode_AA_EN(uint8_t* buf, uint8_t payloadLength)
-{
-	  TX_OK = 0; //Iniciando transmissão (Na IRQ é setada para 1, indicando fim de transmissão
-
-	  //The TX mode is an active mode where the nRF24L01 transmits a packet.
-	  //To enter this mode, the nRF24L01 must have the PWR_UP bit set high, PRIM_RX bit set low,
-	  //a payload in the TX FIFO and, a high pulse on the CE for more than 10μs.
-
-	  //Make sure you sett CE = 0 first, so the chip is in Standby mode before you change radio mode.
-	  //CE (active high and is used to activate the chip in RX or TX mode) - 0: Desativa o transceiver para programação
-	  HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
-
-
-	  //Configurar transceiver para transmissão de dados
-	  // CONFIG register (nRF24LE01):
-	  // b7. Reserved 		= 0;
-	  // b6. MASK_RX_DR 	= 0: Reflect RX_DR as active low on RFIRQ (interrupt)
-	  // b5. MASK_TX_DS 	= 0: Reflect TX_DS as active low interrupt on RFIRQ
-	  // b4. MASK_MAX_RT 	= 0: Reflect MAX_RT as active low on RFIRQ
-	  // b3. EN_CRC 		= 1: Enable CRC - Forced high if one of the bits in the EN_AA is high
-	  // b2. CRCO 			= 1: CRC encoding 2 bytes
-	  // b1. PWR_UP 		= 1: POWER UP
-	  // b0. PRIM_RX 		= 0: RX/TX control with TX (sets the nRF24L01 in transmit/receive)
-	  uint8_t config = 0x0E; // 0000 1110
-	  SPI_Write_Reg(CONFIG, &config);
-
-	  //enviar (transmitir) endereço do receptor para o qual a mensagem será enviada (o outro nRF24L01)
-	  SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
-
-	  //Envia o payload para o transceiver.
-	  SPI_Write_Buf(W_TX_PAYLOAD, buf, payloadLength); // Writes data to TX payload
-
-	//TO DO -- para maior eficiência, implementar transmissão (dois lados do link) com
-	//ACK e Auto-Retransmite... ACK permite uso da interrupção (IRQ) via flag TX_DS...
-
-	  //Iniciar transmissão - ativar TX-RF
-	  // Set CE pin high to enable TX Mode
-	  //	CE (active high and is used to activate the chip in RX or TX mode)
-	  // 	- a: Ativa o transceiver para RX
-	  HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_SET);
-
-	  //Aguardar IRQ indicando que concluiu a transmissão..
-
-	  HAL_Delay(2); //delay suficiente para transmitir o payload maximo de 32 bytes.
-	            //Com data rate de 1Mbps ==> 1us por bit;
-	            //Pacote transmitido: Preambulo (1 byte) + endereço (5bytes) + controle (9bits) + payload (até 32 bytes)
-	            //                    + CRC (2 bytes) ==> Total 329 bits (pacote maximo) ==> ou seja 329useg
-	            //    adicionando os tempos de wakeup etc, teríamos +- 1mseg... vou usar 2mseg por segurança aqui...
-
-	  RX_Mode_AA_EN();
 }
