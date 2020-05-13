@@ -83,6 +83,13 @@ Pinos padrão
 #define _RF_LED_Pin        GPIO_PIN_13
 #define _RF_LED_GPIO_Port  GPIOC
 
+extern uint16_t LED_VERMELHO_Pin;
+extern uint16_t LED_VERDE_Pin;
+
+#define LED_VERDE GPIO_PIN_8
+#define LED_Port GPIOB
+#define LED_VERMELHO GPIO_PIN_9
+
 /**
  * Parâmetros da comunicação SPI
  **/

@@ -100,8 +100,8 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
 
     if(autoAck_enable)
     {
-    	en_aa_value = 0x01;			// Enabled Auto Acknowledgment
-		setup_retr_value = 0x05;	// Enabled retransmission (5 max)
+    	en_aa_value = 0x01;			// Enabled Auto Acknowledgment on pipe 0
+		setup_retr_value = 0x25;	// Enabled retransmission (5 max)
 
     	// EN_AA register: Enable Auto Acknowledgment: Pipe 0
     	SPI_Write_Reg(EN_AA, &en_aa_value);
@@ -334,10 +334,10 @@ void SPI_Read_rx_buf(uint8_t *buf)
 void RX_Mode(void)
 {
     //rx_newPayload = 0;
-    status = 0;
+    //status = 0;
     RX_OK = 0;
 
-    uint8_t config_value = 0x1F;
+    uint8_t config_value = 0x0F;
 
     //The RX mode is an active mode where the nRF24L01 radio is a receiver. To enter this mode, the
     //nRF24L01 must have the PWR_UP bit set high, PRIM_RX bit set high and the CE pin set high.
@@ -370,8 +370,9 @@ void RX_Mode(void)
  **/
 void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
 {
-	HAL_Delay(1); // Delay to give NRf time to transmit the ACK packet
-
+    RX_Mode();
+	//HAL_Delay(1); // Delay to give NRf time to transmit the ACK packet
+    //HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
     // Read STATUS register
     status = SPI_Read_Status();
 
@@ -393,23 +394,38 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
         *newPayload = 1;
     }
 
+    
+
+    uint8_t sta_val = 0x70;
+    SPI_Write_Reg(NRF_STATUS, &sta_val);
+
     //se o pacote foi reconhecido pelo receptor (funciona com TX-ACK)
     if(status & TX_DS)
     {
         //Completou TX ?
         TX_OK = 1;
+        //RX_Mode();
         SPI_Write(FLUSH_TX,0); //limpar o buffer TX
+        HAL_GPIO_TogglePin(LED_Port, LED_VERDE);
+
     }
     
     // If the maximum number of retransmissions was reached
     if(status & MAX_RT)
     {
-    	// Do nothing
+    	//
+    	SPI_Write(FLUSH_TX,0); //limpar o buffer TX
+    	HAL_GPIO_TogglePin(LED_Port, LED_VERMELHO);
+
     }
 
+
+
     //Reset status
-    uint8_t sta_val = 0x70;
-    SPI_Write_Reg(NRF_STATUS, &sta_val);
+    
+    //RX_Mode();
+
+
 }
 
 
@@ -473,11 +489,17 @@ void TX_Mode(uint8_t* buf, uint8_t payloadLength, uint8_t autoAck_enabled)
 
 	  //Aguardar IRQ indicando que concluiu a transmissão..
 
-	  HAL_Delay(2); //delay suficiente para transmitir o payload maximo de 32 bytes.
+	  //HAL_Delay(1); //delay suficiente para transmitir o payload maximo de 32 bytes.
 	            //Com data rate de 1Mbps ==> 1us por bit;
 	            //Pacote transmitido: Preambulo (1 byte) + endereço (5bytes) + controle (9bits) + payload (até 32 bytes)
 	            //                    + CRC (2 bytes) ==> Total 329 bits (pacote maximo) ==> ou seja 329useg
 	            //    adicionando os tempos de wakeup etc, teríamos +- 1mseg... vou usar 2mseg por segurança aqui...
 
-	  RX_Mode();
+	  //RX_Mode();
+
+	  /*
+	   * COLOCAR UM WHILE PRA MUDAR PRA RX MODE
+	   *
+	   * INDENTIFICAR SE QUAL INTERRUPÇÃO QUE TÁ SENDO ACIONADA (TX OU MAX_RT) USANDO LED
+	   */
 }

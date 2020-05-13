@@ -77,7 +77,7 @@ uint8_t rf_tx_SendMsg = 0;
 uint8_t rfBridgeON = 0;				// Flag de ponte
 uint8_t rx_newData = 0;
 
-uint8_t autoAck_enabled = 1;	// Activates the Auto Acknowledgment function
+uint8_t autoAck_enabled = 0;	// Activates the Auto Acknowledgment function
 
 /* USER CODE END 0 */
 
@@ -254,6 +254,9 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, RF_CE_Pin|RF_CSN_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, LED_VERDE_Pin|LED_VERMELHO_Pin, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -273,6 +276,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(RF_IRQ_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LED_VERDE_Pin LED_VERMELHO_Pin */
+  GPIO_InitStruct.Pin = LED_VERDE_Pin|LED_VERMELHO_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
@@ -313,7 +323,7 @@ void rx_task()
           //Enviar pacote recebido para o código do HOST (Visual Studio) via serial COMM (USB)
 
         	CDC_Transmit_FS(rx_buf, rx_payloadWidth);
-        	HAL_Delay(10);
+        	HAL_Delay(5);
         }
 
     }
@@ -434,7 +444,6 @@ void tx_task()
       index_atual += 32;
     }
   }
-
   //Sinalizar mensagem transmitida
   rf_tx_SendMsg = 0;
 }
@@ -451,6 +460,7 @@ void tx_task()
 void rfSendBuffer(uint8_t *buffer2send, uint8_t buffer_size)
 {
   uint8_t send_index = 0;
+  
   // Escreve no buffer de saída (tx_buf) os bytes a serem enviados
   for (int i = 0; i < buffer_size; i++)
   {

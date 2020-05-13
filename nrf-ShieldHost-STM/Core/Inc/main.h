@@ -74,6 +74,10 @@ void Error_Handler(void);
 #define RF_IRQ_Pin GPIO_PIN_0
 #define RF_IRQ_GPIO_Port GPIOB
 #define RF_IRQ_EXTI_IRQn EXTI0_IRQn
+#define LED_VERDE_Pin GPIO_PIN_8
+#define LED_VERDE_GPIO_Port GPIOB
+#define LED_VERMELHO_Pin GPIO_PIN_9
+#define LED_VERMELHO_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

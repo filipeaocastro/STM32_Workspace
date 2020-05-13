@@ -11,4 +11,4 @@ nRF24L01_STM32.c:310:6:SPI_Read_Buf	16	static
 nRF24L01_STM32.c:322:6:SPI_Read_rx_buf	24	static
 nRF24L01_STM32.c:334:6:RX_Mode	16	static
 nRF24L01_STM32.c:371:6:RF_IRQ	32	static
-nRF24L01_STM32.c:422:6:TX_Mode	24	static
+nRF24L01_STM32.c:438:6:TX_Mode	24	static
