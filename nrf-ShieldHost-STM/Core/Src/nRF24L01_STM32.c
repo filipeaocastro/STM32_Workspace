@@ -62,10 +62,10 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
 	// Setup values of the registers
 	uint8_t rf_setup_byte;
 	uint8_t setup_aw_value = 0x03;	//Setup of Address Widths ('11' - 5 bytes)
-	uint8_t en_aa_value;			//Auto Acknowledgment Function on pipe 0
-	uint8_t en_rxaddr_value = 0x01;	//Enabled RX Addresses (only pipe 0)
+	uint8_t en_aa_value;			//Auto Acknowledgment Function on pipe 0 e 1
+	uint8_t en_rxaddr_value = 0x03;	//Enabled RX Addresses (only pipe 1)
 	uint8_t setup_retr_value;		//Setup of Automatic Retransmission
-	uint8_t dypnd_value = 0x01;		//Enable dynamic payload length
+	uint8_t dypnd_value = 0x03;		//Enable dynamic payload length
 	uint8_t feature_value = 0x05;	//Feature Register
 	uint8_t zero = 0x00;			// 0 (0) (2*5 - 11 + 1)
 	uint8_t nrf_status_value = 0x07;// Status
@@ -96,23 +96,23 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
     // Configuration register é definido quando entra no modo RX ou TX (ver funções para cada modo)
 
     // EN_RXADDR register: Enable Pipe0 (only pipe0)
-    SPI_Write_Reg(EN_RXADDR, &en_rxaddr_value);    // Enable Pipe0 (only pipe0)
+    SPI_Write_Reg(EN_RXADDR, &en_rxaddr_value);    // Enable Pipe 0 e 1
 
     if(autoAck_enable)
     {
-    	en_aa_value = 0x01;			// Enabled Auto Acknowledgment on pipe 0
-		setup_retr_value = 0x25;	// Enabled retransmission (5 max)
+    	en_aa_value = 0x03;			// Enabled Auto Acknowledgment on pipe 0 e 1
+		setup_retr_value = 0x15;	// Enabled retransmission (5 max with 500 us interval)
 
-    	// EN_AA register: Enable Auto Acknowledgment: Pipe 0
+    	// EN_AA register: Enable Auto Acknowledgment: Pipe 1
     	SPI_Write_Reg(EN_AA, &en_aa_value);
 
-    	// SETUP_RETR register: Time to automatic retransmission selected: 250us, retransmission enabled
+    	// SETUP_RETR register: Time to automatic retransmission selected: 500us, retransmission enabled
 		SPI_Write_Reg(SETUP_RETR, &setup_retr_value);
     }
     else
     {
     	en_aa_value = 0x00;			// Disabled Auto Acknowledgment
-		setup_retr_value = 0x00;	// Disabled retransmission (5 max)
+		setup_retr_value = 0x00;	// Disabled retransmission
 
     	// EN_AA register: Disable Auto Acknowledgment
 		SPI_Write_Reg(EN_AA, &en_aa_value);        // Disable Auto Acknowledgment: All pipes
@@ -156,7 +156,7 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
         switch (rf_data_rate) 
         {
         case RF_DATA_RATE_1Mbps: //bit 3 = 0
-            rf_setup_byte &= 0xF7;//1111 0111
+            rf_setup_byte |= 0x00;//0000 0000
         break;
         case RF_DATA_RATE_2Mbps: //bit 3 = 1
             rf_setup_byte |= 0x08;//0000 1000
@@ -164,14 +164,19 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
         }
 
     //Bit 4: PLL_LOCK = 0; bits 7:5 = Reserved = 000
-    rf_setup_byte &= 0x0F;//0000 1111
+    //rf_setup_byte &= 0x0F;//0000 1111
     SPI_Write_Reg(RF_SETUP, &rf_setup_byte);     // TX_PWR:0dBm, Datarate:1Mbps, LNA:HCURR
 
+    /**
+     * SET THE TX_ADDR EQUAL AS THE RX_ADDR_P0 IN ORDER TO USE THE AUTO ACK
+     * */
     //Transmiter Address.
-    SPI_Write_Buf_Reg(TX_ADDR, ADDR_HOST, TX_RX_ADDR_WIDTH);
+    SPI_Write_Buf_Reg(TX_ADDR, ADDR_HOST_P0_AND_TX, TX_RX_ADDR_WIDTH);
     //Receiver Address - Pipe 0
-    SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
-    // Ativa Payload dinamico em data pipe 0
+    SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST_P0_AND_TX, TX_RX_ADDR_WIDTH);
+    //Receiver Address - Pipe 1
+    SPI_Write_Buf_Reg(RX_ADDR_P1, ADDR_HOST_P1, TX_RX_ADDR_WIDTH);
+    // Ativa Payload dinamico em data pipe 0 e 1
     SPI_Write_Reg(DYNPD, &dypnd_value);        // Ativa Payload dinâmico em data pipe 0
     // Ativa Payload dinamico, com ACK e comando W_TX_PAY
     SPI_Write_Reg(FEATURE, &feature_value);      // Ativa Payload dinâmico, com ACK e comando W_TX_PAY
@@ -337,7 +342,7 @@ void RX_Mode(void)
     //status = 0;
     RX_OK = 0;
 
-    uint8_t config_value = 0x0F;
+    uint8_t config_value = 0x1F;
 
     //The RX mode is an active mode where the nRF24L01 radio is a receiver. To enter this mode, the
     //nRF24L01 must have the PWR_UP bit set high, PRIM_RX bit set high and the CE pin set high.
@@ -370,7 +375,7 @@ void RX_Mode(void)
  **/
 void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
 {
-    RX_Mode();
+    
 	//HAL_Delay(1); // Delay to give NRf time to transmit the ACK packet
     //HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
     // Read STATUS register
@@ -394,10 +399,9 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
         *newPayload = 1;
     }
 
-    
+    RX_Mode();
 
-    uint8_t sta_val = 0x70;
-    SPI_Write_Reg(NRF_STATUS, &sta_val);
+    
 
     //se o pacote foi reconhecido pelo receptor (funciona com TX-ACK)
     if(status & TX_DS)
@@ -422,7 +426,8 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
 
 
     //Reset status
-    
+    uint8_t sta_val = 0x70;
+    SPI_Write_Reg(NRF_STATUS, &sta_val);
     //RX_Mode();
 
 
@@ -468,10 +473,10 @@ void TX_Mode(uint8_t* buf, uint8_t payloadLength, uint8_t autoAck_enabled)
 
 	  SPI_Write_Reg(CONFIG, &config);
 
-	  HAL_Delay(2);
+	  HAL_Delay(1);
 
 	  //enviar (transmitir) endereço do receptor para o qual a mensagem será enviada (o outro nRF24L01)
-	  SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST, TX_RX_ADDR_WIDTH);
+	  //SPI_Write_Buf_Reg(TX_ADDR, ADDR_HOST_P0_AND_TX, TX_RX_ADDR_WIDTH);
 
 	  //Envia o payload para o transceiver.
 	  if(autoAck_enabled)
@@ -495,6 +500,9 @@ void TX_Mode(uint8_t* buf, uint8_t payloadLength, uint8_t autoAck_enabled)
 	            //                    + CRC (2 bytes) ==> Total 329 bits (pacote maximo) ==> ou seja 329useg
 	            //    adicionando os tempos de wakeup etc, teríamos +- 1mseg... vou usar 2mseg por segurança aqui...
 
+        //HAL_Delay(1);
+        //HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
+        
 	  //RX_Mode();
 
 	  /*

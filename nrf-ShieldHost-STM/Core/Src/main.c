@@ -77,7 +77,7 @@ uint8_t rf_tx_SendMsg = 0;
 uint8_t rfBridgeON = 0;				// Flag de ponte
 uint8_t rx_newData = 0;
 
-uint8_t autoAck_enabled = 0;	// Activates the Auto Acknowledgment function
+uint8_t autoAck_enabled = 1;	// Activates the Auto Acknowledgment function
 
 /* USER CODE END 0 */
 
@@ -469,6 +469,7 @@ void rfSendBuffer(uint8_t *buffer2send, uint8_t buffer_size)
   }
   //Enviar via RF
   TX_Mode(tx_buf, send_index, autoAck_enabled);
+  HAL_Delay(5);
 }
 
 /********** TEST FUNCTIONS **********/
