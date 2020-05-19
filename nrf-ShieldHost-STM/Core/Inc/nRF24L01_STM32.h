@@ -101,7 +101,7 @@ SPI_HandleTypeDef _spi;
 //Endereço de recepção (0x0A RX_ADDR_P0). Usando default 0xE7E7E7E7E7 (when changing: LSB written first)
 //Usando o mesmo para RX e TX e será constante:
 static uint8_t ADDR_HOST_P0_AND_TX[TX_RX_ADDR_WIDTH] =  {0x78, 0x78, 0x78, 0x78, 0x78};
-static uint8_t ADDR_HOST_P1[TX_RX_ADDR_WIDTH] =  {0xB3, 0xB4, 0xB5, 0xB6, 0x03};
+//static uint8_t ADDR_HOST_P1[TX_RX_ADDR_WIDTH] =  {0xB3, 0xB4, 0xB5, 0xB6, 0x03};
 //payloads
 //static uint8_t rx_buf[PAYLOAD_WIDTH];    // Define lenght of rx_buf and tx_buf
 static uint8_t tx_buf[PAYLOAD_WIDTH];

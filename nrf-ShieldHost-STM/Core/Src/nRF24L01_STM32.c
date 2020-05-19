@@ -63,7 +63,7 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
 	uint8_t rf_setup_byte;
 	uint8_t setup_aw_value = 0x03;	//Setup of Address Widths ('11' - 5 bytes)
 	uint8_t en_aa_value;			//Auto Acknowledgment Function on pipe 0 e 1
-	uint8_t en_rxaddr_value = 0x03;	//Enabled RX Addresses (only pipe 1)
+	uint8_t en_rxaddr_value = 0x01;	//Enabled RX Addresses (only pipe 1)
 
 	/* MUDAR EN RXADDR SÓ PRO PIPE QUE RECEBE */
 	uint8_t setup_retr_value;		//Setup of Automatic Retransmission
@@ -178,7 +178,7 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
     SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST_P0_AND_TX, TX_RX_ADDR_WIDTH);
     //Receiver Address - Pipe 1
     //z
-    SPI_Write_Buf_Reg(RX_ADDR_P1, ADDR_HOST_P1, TX_RX_ADDR_WIDTH);
+    //SPI_Write_Buf_Reg(RX_ADDR_P1, ADDR_HOST_P1, TX_RX_ADDR_WIDTH);
 
     //SPI_Write_Reg(RX_PW_P0, &n_bytes_p0);
 

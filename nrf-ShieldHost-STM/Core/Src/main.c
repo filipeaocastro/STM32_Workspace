@@ -35,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define nRF_Canal 0x4c
+#define nRF_Canal 0x92
 #define NUM_CHARS 256
 /* USER CODE END PD */
 
