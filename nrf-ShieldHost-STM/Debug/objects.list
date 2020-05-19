@@ -1,3 +1,4 @@
+"Core/Src/dwt_stm32_delay.o"
 "Core/Src/main.o"
 "Core/Src/nRF24L01_STM32.o"
 "Core/Src/stm32f1xx_hal_msp.o"

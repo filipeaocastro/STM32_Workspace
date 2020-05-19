@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "usbd_cdc_if.h"
+#include "dwt_stm32_delay.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -34,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define nRF_Canal 92
+#define nRF_Canal 0x4c
 #define NUM_CHARS 256
 /* USER CODE END PD */
 
@@ -60,6 +61,8 @@ void rfSendBuffer(uint8_t *buffer2send, uint8_t buffer_size);
 void get_Msg_fromHost(void);	// Read messages from Host
 void tx_task(void);		// Verifies if there is any message from Host and send to MIP
 void rx_task(void);		// Receive message from MIP and send to Host
+void IRQ_read(void);	// Reads the IRQ pin
+void waitForIRQ(void);	// Stop the program until the IRQ pin is read as 0
 
 uint8_t convert2ascii(uint8_t num);	// Test function
 void printAscii(uint8_t byte);		// Test function
@@ -113,6 +116,7 @@ int main(void)
   MX_SPI1_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
+  DWT_Delay_Init ();
 
   nRFint_guard = 0;		// Do not execute interruptions until the nRF initalization is complete
   rf_tx_buffer_count = 0;
@@ -139,6 +143,8 @@ int main(void)
 
 
 	  get_Msg_fromHost();	// Read the messages from the host received via USB
+
+	  IRQ_read();
 
 
 	  tx_task();	// If there is message from the Host, read correctly by get_Msg_fromHost(), it's
@@ -273,7 +279,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : RF_IRQ_Pin */
   GPIO_InitStruct.Pin = RF_IRQ_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(RF_IRQ_GPIO_Port, &GPIO_InitStruct);
 
@@ -284,28 +290,41 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-
 }
 
 /* USER CODE BEGIN 4 */
+
+
 /**
  * Função de callback chamada toda vez que ocorre ocorre uma interrupção externa (FALLING) no pino IRQ do nRF.
  * Caso o nRFint_guard permita, ela salva o conteúdo recebido pelo RF, salva no rx_buf e ativa a flag rx_newPayload.
  */
+/*
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if(GPIO_Pin == RF_IRQ_Pin)
   {
 	  // As interrupções já podem ser tratadas?
 	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  //HAL_Delay(5);
 	  if(nRFint_guard > 0)
 		  // Salva o conteúdo em rx_buf, a qte de bytes em rx_payloadWidth e ativa a flag rx_newPayload.
 		  RF_IRQ(rx_buf, &rx_payloadWidth, &rx_newPayload);
   }
+}*/
+
+
+void IRQ_read()
+{
+	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	if( (nRFint_guard > 0) && (HAL_GPIO_ReadPin(RF_IRQ_GPIO_Port, RF_IRQ_Pin) == 0) )
+	{
+		//HAL_Delay(5);
+		RF_IRQ(rx_buf, &rx_payloadWidth, &rx_newPayload);
+	}
 }
+
+
 /**
  * Verifica se algum pacote foi recebido pela interrupção e envia ao Host.
  */
@@ -434,13 +453,14 @@ void tx_task()
       //Se existem menos de 32 bytes para serem enviados
       rfSendBuffer(&rf_tx_buffer[index_atual], (uint8_t)actual_length);
       HAL_Delay(1); //Aguardar transmissão -- max 32 bytes
+      waitForIRQ();
       index_atual += actual_length;
     }
     else
     {
       //Se existem pelo menos 32 bytes para serem escritos, escreve um pacote
       rfSendBuffer(&rf_tx_buffer[index_atual], 32);
-      HAL_Delay(1); //Aguardar transmissão -- max 32 bytes
+      waitForIRQ();
       index_atual += 32;
     }
   }
@@ -469,9 +489,18 @@ void rfSendBuffer(uint8_t *buffer2send, uint8_t buffer_size)
   }
   //Enviar via RF
   TX_Mode(tx_buf, send_index, autoAck_enabled);
-  HAL_Delay(5);
+  //HAL_Delay(5);
 }
 
+/**
+ *
+ *
+ */
+void waitForIRQ()
+{
+	while(HAL_GPIO_ReadPin(RF_IRQ_GPIO_Port, RF_IRQ_Pin) != 0);
+	IRQ_read();
+}
 /********** TEST FUNCTIONS **********/
 
 uint8_t convert2ascii(uint8_t num)

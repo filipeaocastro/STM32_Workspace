@@ -25,6 +25,7 @@ Core/Src/stm32f1xx_it.o: ../Core/Src/stm32f1xx_it.c ../Core/Inc/main.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_usb.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd_ex.h \
  ../Core/Inc/nRF24L01_STM32.h ../Core/Inc/nRF24L01.h \
+ ../Core/Inc/dwt_stm32_delay.h \
  ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h \
  ../Core/Inc/stm32f1xx_it.h
 
@@ -83,6 +84,8 @@ Core/Src/stm32f1xx_it.o: ../Core/Src/stm32f1xx_it.c ../Core/Inc/main.h \
 ../Core/Inc/nRF24L01_STM32.h:
 
 ../Core/Inc/nRF24L01.h:
+
+../Core/Inc/dwt_stm32_delay.h:
 
 ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h:
 

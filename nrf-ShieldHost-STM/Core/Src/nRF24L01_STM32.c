@@ -64,11 +64,13 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
 	uint8_t setup_aw_value = 0x03;	//Setup of Address Widths ('11' - 5 bytes)
 	uint8_t en_aa_value;			//Auto Acknowledgment Function on pipe 0 e 1
 	uint8_t en_rxaddr_value = 0x03;	//Enabled RX Addresses (only pipe 1)
+
+	/* MUDAR EN RXADDR SÓ PRO PIPE QUE RECEBE */
 	uint8_t setup_retr_value;		//Setup of Automatic Retransmission
-	uint8_t dypnd_value = 0x03;		//Enable dynamic payload length
-	uint8_t feature_value = 0x05;	//Feature Register
+	uint8_t dypnd_value = 0x3f;		//Enable dynamic payload length
+	uint8_t feature_value = 0x04;	//Feature Register
 	uint8_t zero = 0x00;			// 0 (0) (2*5 - 11 + 1)
-	uint8_t nrf_status_value = 0x07;// Status
+	uint8_t nrf_status_value = 0x70;// Status
 
     //uint8_t addr_host[TX_RX_ADDR_WIDTH] = {0xE7,0xE7,0xE7,0xE7,0xE7};
 
@@ -98,12 +100,12 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
     // EN_RXADDR register: Enable Pipe0 (only pipe0)
     SPI_Write_Reg(EN_RXADDR, &en_rxaddr_value);    // Enable Pipe 0 e 1
 
-    if(autoAck_enable)
+    if(autoAck_enable > 0)
     {
-    	en_aa_value = 0x03;			// Enabled Auto Acknowledgment on pipe 0 e 1
+    	en_aa_value = 0x3f;			// Enabled Auto Acknowledgment on pipe 0 e 1
 		setup_retr_value = 0x15;	// Enabled retransmission (5 max with 500 us interval)
 
-    	// EN_AA register: Enable Auto Acknowledgment: Pipe 1
+    	// EN_AA register: Enable Auto Acknowledgment: Pipe 0
     	SPI_Write_Reg(EN_AA, &en_aa_value);
 
     	// SETUP_RETR register: Time to automatic retransmission selected: 500us, retransmission enabled
@@ -137,7 +139,7 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
 
         case RF_TX_POWER_NEGATIVE_12dBm: //bits 2:1 = 01
             rf_setup_byte |= 0x02;//0000 0010
-            rf_setup_byte &= 0xFB;//1111 1011 
+            //rf_setup_byte &= 0xFB;//1111 1011
         break;
 
         case RF_TX_POWER_NEGATIVE_6dBm: //bits 2:1 = 10
@@ -175,11 +177,15 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
     //Receiver Address - Pipe 0
     SPI_Write_Buf_Reg(RX_ADDR_P0, ADDR_HOST_P0_AND_TX, TX_RX_ADDR_WIDTH);
     //Receiver Address - Pipe 1
+    //z
     SPI_Write_Buf_Reg(RX_ADDR_P1, ADDR_HOST_P1, TX_RX_ADDR_WIDTH);
-    // Ativa Payload dinamico em data pipe 0 e 1
-    SPI_Write_Reg(DYNPD, &dypnd_value);        // Ativa Payload dinâmico em data pipe 0
+
+    //SPI_Write_Reg(RX_PW_P0, &n_bytes_p0);
+
     // Ativa Payload dinamico, com ACK e comando W_TX_PAY
     SPI_Write_Reg(FEATURE, &feature_value);      // Ativa Payload dinâmico, com ACK e comando W_TX_PAY
+    // Ativa Payload dinamico em data pipe 0 e 1
+    SPI_Write_Reg(DYNPD, &dypnd_value);        // Ativa Payload dinâmico em data pipe 0
 
     //After the packet is validated, Enhanched ShockBurst™ disassembles the packet and loads the payload into
     //the RX FIFO, and assert the RX_DR IRQ (active low)
@@ -280,10 +286,10 @@ uint8_t SPI_Read(uint8_t command)
 uint8_t SPI_Read_Status()
 {
     uint8_t reg_read = 0;
-    uint8_t zeros = 0xFF;
+    uint8_t nop = NOP;
 
     HAL_GPIO_WritePin(_RF_CSN_GPIO_Port, _RF_CSN_Pin, GPIO_PIN_RESET);    // CSN low, initiate SPI transaction
-    HAL_SPI_TransmitReceive (&_spi, &zeros, &reg_read, 1, HAL_MAX_DELAY);
+    HAL_SPI_TransmitReceive (&_spi, &nop, &reg_read, 1, HAL_MAX_DELAY);
     HAL_GPIO_WritePin(_RF_CSN_GPIO_Port, _RF_CSN_Pin, GPIO_PIN_SET);      // CSN high again, ends SPI transaction
 
     return reg_read;
@@ -376,7 +382,7 @@ void RX_Mode(void)
 void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
 {
     
-	//HAL_Delay(1); // Delay to give NRf time to transmit the ACK packet
+	DWT_Delay_us(500); // Delay to give NRf time to transmit the ACK packet
     //HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
     // Read STATUS register
     status = SPI_Read_Status();
@@ -398,8 +404,6 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
 
         *newPayload = 1;
     }
-
-    RX_Mode();
 
     
 
@@ -428,7 +432,7 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
     //Reset status
     uint8_t sta_val = 0x70;
     SPI_Write_Reg(NRF_STATUS, &sta_val);
-    //RX_Mode();
+    RX_Mode();
 
 
 }
@@ -473,18 +477,18 @@ void TX_Mode(uint8_t* buf, uint8_t payloadLength, uint8_t autoAck_enabled)
 
 	  SPI_Write_Reg(CONFIG, &config);
 
-	  HAL_Delay(1);
+	  //HAL_Delay(1);
 
 	  //enviar (transmitir) endereço do receptor para o qual a mensagem será enviada (o outro nRF24L01)
 	  //SPI_Write_Buf_Reg(TX_ADDR, ADDR_HOST_P0_AND_TX, TX_RX_ADDR_WIDTH);
 
 	  //Envia o payload para o transceiver.
 	  if(autoAck_enabled)
-		  SPI_Write_Buf(W_TX_PAYLOAD, buf, payloadLength); // Writes data to TX payload
+		  SPI_Write_Buf(W_ACK_PAYLOAD, buf, payloadLength); // Writes data to TX payload
 	  else
 		  SPI_Write_Buf(W_TX_PAYLOAD_NOACK, buf, payloadLength); // Writes data to TX payload without Acknowledgment
 
-	  HAL_Delay(1);
+	  //HAL_Delay(1);
 
 	  //Iniciar transmissão - ativar TX-RF
 	  // Set CE pin high to enable TX Mode
@@ -500,14 +504,6 @@ void TX_Mode(uint8_t* buf, uint8_t payloadLength, uint8_t autoAck_enabled)
 	            //                    + CRC (2 bytes) ==> Total 329 bits (pacote maximo) ==> ou seja 329useg
 	            //    adicionando os tempos de wakeup etc, teríamos +- 1mseg... vou usar 2mseg por segurança aqui...
 
-        //HAL_Delay(1);
-        //HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
-        
-	  //RX_Mode();
-
-	  /*
-	   * COLOCAR UM WHILE PRA MUDAR PRA RX MODE
-	   *
-	   * INDENTIFICAR SE QUAL INTERRUPÇÃO QUE TÁ SENDO ACIONADA (TX OU MAX_RT) USANDO LED
-	   */
+	  DWT_Delay_us(15);
+	  HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
 }
