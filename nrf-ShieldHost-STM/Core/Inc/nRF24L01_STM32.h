@@ -101,6 +101,7 @@ SPI_HandleTypeDef _spi;
 //Endereço de recepção (0x0A RX_ADDR_P0). Usando default 0xE7E7E7E7E7 (when changing: LSB written first)
 //Usando o mesmo para RX e TX e será constante:
 static uint8_t ADDR_HOST_P0_AND_TX[TX_RX_ADDR_WIDTH] =  {0x78, 0x78, 0x78, 0x78, 0x78};
+//static uint8_t ADDR_HOST_P0_AND_TX[TX_RX_ADDR_WIDTH] =  {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
 //static uint8_t ADDR_HOST_P1[TX_RX_ADDR_WIDTH] =  {0xB3, 0xB4, 0xB5, 0xB6, 0x03};
 //payloads
 //static uint8_t rx_buf[PAYLOAD_WIDTH];    // Define lenght of rx_buf and tx_buf
@@ -110,8 +111,7 @@ static uint8_t tx_buf[PAYLOAD_WIDTH];
 static uint8_t status;     // Contains the STATUS register reading
 static uint8_t TX_OK = 0;  //Indicar MODO TX ativo (1) ou Inativo (0)
 static uint8_t RX_OK = 0;  //Indicar MODO RX ativo (1) ou Inativo (0)
-static uint8_t aa_0x01 = 0x01;
-static uint8_t n_bytes_p0 = 0x20;
+static uint8_t autoAck_enable = 0;
 
 
 static void SPI_Write(uint8_t command, uint8_t * value);
@@ -139,9 +139,9 @@ GPIO_InitTypeDef RF_IRQ_Pin, GPIO_InitTypeDef RF_IRQ_GPIO_Port);*/
 /* Constructor default */
 void nRF24L01_STM32(SPI_HandleTypeDef spi);
 
-void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr, uint8_t autoAck_enable);
+void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr, uint8_t _autoAck_enable);
 void RX_Mode(void);
-void TX_Mode(uint8_t* buf, uint8_t payloadLength, uint8_t autoAck_enable);
+void TX_Mode(uint8_t* buf, uint8_t payloadLength);
 void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload);
 uint8_t getnRFStatus();
 uint8_t SPI_read2(uint8_t reg);

@@ -35,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define nRF_Canal 0x92
+#define nRF_Canal 92
 #define NUM_CHARS 256
 /* USER CODE END PD */
 
@@ -488,7 +488,7 @@ void rfSendBuffer(uint8_t *buffer2send, uint8_t buffer_size)
     send_index += 1;
   }
   //Enviar via RF
-  TX_Mode(tx_buf, send_index, autoAck_enabled);
+  TX_Mode(tx_buf, send_index);
   //HAL_Delay(5);
 }
 

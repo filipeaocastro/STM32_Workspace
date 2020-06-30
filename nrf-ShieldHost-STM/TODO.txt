@@ -9,3 +9,7 @@
 [X] Ver se precisa arrumar tx_task
 [X] Ver se precisa mudar mesmo o RX_mode (excluído RX_mode_AA_EN, era redundante)
 [X] Colocar if nas funções e excluir TX_mode_AA_EN e init_AA_EN
+
+ARRUMAR FIRMWARE DO RF DO MIP
+- MUDAR O FEATURE PRA 0X04
+- MUDAR O ENDEREÇO PRO 0X78
