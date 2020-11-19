@@ -17,7 +17,6 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
@@ -94,7 +93,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-  
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -120,6 +118,7 @@ int main(void)
   DWT_Delay_Init ();
   init_led(LED_R_Pin, GPIOB, LED_G_Pin, GPIOB,LED_B_Pin, GPIOB);
   acende_led(RED);
+  HAL_Delay(500);
 
   nRFint_guard = 0;		// Do not execute interruptions until the nRF initalization is complete
   rf_tx_buffer_count = 0;
@@ -144,10 +143,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if(rfBridgeON)
+	if(rfBridgeON)
       acende_led(GREEN);
     else
-      acende_led(MAGENTA);
+      acende_led(CYAN);
 
 	  get_Msg_fromHost();	// Read the messages from the host received via USB
 
@@ -174,7 +173,8 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
@@ -187,7 +187,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
@@ -268,7 +268,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(RF_CSN_GPIO_Port, RF_CSN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, RF_CE_Pin|LED_B_Pin|LED_G_Pin|LED_R_Pin 
+  HAL_GPIO_WritePin(GPIOB, RF_CE_Pin|LED_G_Pin|LED_B_Pin|LED_R_Pin
                           |LED_VERDE_Pin|LED_VERMELHO_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED_Pin */
@@ -291,9 +291,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(RF_CSN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RF_CE_Pin LED_B_Pin LED_G_Pin LED_R_Pin 
+  /*Configure GPIO pins : RF_CE_Pin LED_G_Pin LED_B_Pin LED_R_Pin
                            LED_VERDE_Pin LED_VERMELHO_Pin */
-  GPIO_InitStruct.Pin = RF_CE_Pin|LED_B_Pin|LED_G_Pin|LED_R_Pin 
+  GPIO_InitStruct.Pin = RF_CE_Pin|LED_G_Pin|LED_B_Pin|LED_R_Pin
                           |LED_VERDE_Pin|LED_VERMELHO_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -431,11 +431,11 @@ void get_Msg_fromHost()
                 	HAL_Delay(5);
                   apaga_led();
 
-                  for(int i = 0; i < 5; i++)
-                  {
-                    toggle_led(PURPLE);
-                    HAL_Delay(60);
-                  }
+                  //for(int i = 0; i < 5; i++)
+                  //{
+                  //  toggle_led(PURPLE);
+                  //  HAL_Delay(100);
+                  //}
 
                   rfBridgeON = 1; //De agora em diante, todos os bytes recebidos do Host serão enviados ao MIP por RF.
                   //HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -574,7 +574,7 @@ void Error_Handler(void)
   * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
-{ 
+{
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */

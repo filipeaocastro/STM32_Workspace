@@ -61,12 +61,12 @@ Pinos padrão
 #define _RF_CSN_GPIO_Port   GPIOA
 
 // Pino do STM onde está conectado o CE (GPIO_Output)
-#define _RF_CE_Pin          GPIO_PIN_3
-#define _RF_CE_GPIO_Port    GPIOA
+#define _RF_CE_Pin          GPIO_PIN_0
+#define _RF_CE_GPIO_Port    GPIOB
 
 // Pino do STM onde está conectado o IRQ (GPIO_EXTI - FALLING)
-#define _RF_IRQ_Pin         GPIO_PIN_0
-#define _RF_IRQ_GPIO_Port   GPIOB
+#define _RF_IRQ_Pin         GPIO_PIN_3
+#define _RF_IRQ_GPIO_Port   GPIOA
 
 // Pino do STM onde está conectado o SCK (Comunicação SPI)
 #define _RF_SCK_Pin         GPIO_PIN_5
@@ -100,8 +100,8 @@ SPI_HandleTypeDef _spi;
 //Endereço de transmissão (0x TX_ADDR). Usando default 0xE7E7E7E7E7 (when changing: LSB written first)
 //Endereço de recepção (0x0A RX_ADDR_P0). Usando default 0xE7E7E7E7E7 (when changing: LSB written first)
 //Usando o mesmo para RX e TX e será constante:
-static uint8_t ADDR_HOST_P0_AND_TX[TX_RX_ADDR_WIDTH] =  {0x78, 0x78, 0x78, 0x78, 0x78};
-//static uint8_t ADDR_HOST_P0_AND_TX[TX_RX_ADDR_WIDTH] =  {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
+//static uint8_t ADDR_HOST_P0_AND_TX[TX_RX_ADDR_WIDTH] =  {0x78, 0x78, 0x78, 0x78, 0x78};
+static uint8_t ADDR_HOST_P0_AND_TX[TX_RX_ADDR_WIDTH] =  {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
 //static uint8_t ADDR_HOST_P1[TX_RX_ADDR_WIDTH] =  {0xB3, 0xB4, 0xB5, 0xB6, 0x03};
 //payloads
 //static uint8_t rx_buf[PAYLOAD_WIDTH];    // Define lenght of rx_buf and tx_buf

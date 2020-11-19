@@ -1,0 +1,19 @@
+[X] Fazer a função do init pra habilitar o Auto Ack
+[X] Adaptar a função de transmitir pra ligar o AACK
+[X] Colocar um if pra tratar a IRQ de MAX_RT
+[X] Ver em que momento tem que configurar o CONFIG pra falar se é PTX ou PRX
+[X] Arrumar funções RX_mode (virou RX_mode_AA_EN)
+[X] Arrumar função TX_mode_NOAACK
+[X] Ver se precisa arrumar get_msg_from_Host
+[X] Ver se precisa arrumar rx_task
+[X] Ver se precisa arrumar tx_task
+[X] Ver se precisa mudar mesmo o RX_mode (excluído RX_mode_AA_EN, era redundante)
+[X] Colocar if nas funções e excluir TX_mode_AA_EN e init_AA_EN
+
+ARRUMAR FIRMWARE DO RF DO MIP
+- MUDAR O FEATURE PRA 0X04
+- MUDAR O ENDEREÇO PRO 0X78
+
+
+[ ] Mudar o pino CE pro A10
+[ ] Mudar pinos dos leds (R -> B1, G -> B10, B -> B11)
