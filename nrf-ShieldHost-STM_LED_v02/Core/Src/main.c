@@ -182,7 +182,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -196,12 +196,12 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
-  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL;
+  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL_DIV1_5;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
@@ -326,8 +326,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 void IRQ_read()
 {
-	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	if( (nRFint_guard > 0) && (HAL_GPIO_ReadPin(RF_IRQ_GPIO_Port, RF_IRQ_Pin) == 0) )
+	//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	if( (nRFint_guard > 0) /*&& (HAL_GPIO_ReadPin(RF_IRQ_GPIO_Port, RF_IRQ_Pin) == 0)*/ )
 	{
 		//HAL_Delay(5);
 		RF_IRQ(rx_buf, &rx_payloadWidth, &rx_newPayload);
@@ -351,8 +351,10 @@ void rx_task()
         {
           //Enviar pacote recebido para o código do HOST (Visual Studio) via serial COMM (USB)
           acende_led(BLUE);
-        	CDC_Transmit_FS(rx_buf, rx_payloadWidth);
-        	HAL_Delay(5);
+          CDC_Transmit_FS(rx_buf, rx_payloadWidth);
+          //DWT_Delay_us(400); // Delay to give NRf time to transmit the ACK packet
+          //HAL_Delay(2);
+          RX_Mode();
           apaga_led();
         }
 
@@ -361,7 +363,7 @@ void rx_task()
 
 /**
  *
- * This function is called everytime an amount of data arrives at the serial port by the activation of the
+ * This function is called every time an amount of data arrives at the serial port by the activation of the
  * rx_newData, which is made by the callback function CDC_Receive_FS.
  * This function verifies if the handshake between the STM and de Host (PC) is already been done. Otherwise,
  * it is done in this function and it activates the rx_tx_SendMsg flag that allows redirectioning the messages from
@@ -428,7 +430,7 @@ void get_Msg_fromHost()
                   //Ecoar para o Host
 
                 	CDC_Transmit_FS(rf_tx_buffer, rf_tx_buffer_count);
-                	HAL_Delay(5);
+                	//HAL_Delay(5);
                   apaga_led();
 
                   //for(int i = 0; i < 5; i++)
@@ -474,7 +476,7 @@ void tx_task()
     {
       //Se existem menos de 32 bytes para serem enviados
       rfSendBuffer(&rf_tx_buffer[index_atual], (uint8_t)actual_length);
-      HAL_Delay(1); //Aguardar transmissão -- max 32 bytes
+      //HAL_Delay(1); //Aguardar transmissão -- max 32 bytes
       waitForIRQ();
       index_atual += actual_length;
     }
@@ -485,7 +487,9 @@ void tx_task()
       waitForIRQ();
       index_atual += 32;
     }
+
   }
+  RX_Mode();	// Só entra em modo RX depois que acaba de enviar os dados
   //Sinalizar mensagem transmitida
   rf_tx_SendMsg = 0;
   apaga_led();

@@ -65,7 +65,7 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
 	uint8_t en_aa_value;			//Auto Acknowledgment Function on pipe 0
 	uint8_t en_rxaddr_value = 0x01;	//Enabled RX Addresses (only pipe 0)
 	uint8_t setup_retr_value;		//Setup of Automatic Retransmission
-	uint8_t dypnd_value = 0x3f;		//Enable dynamic payload length
+	uint8_t dypnd_value = 0x01;		//Enable dynamic payload length
 	uint8_t feature_value;			//Feature Register
 	uint8_t zero = 0x00;			// 0
 	uint8_t nrf_status_value = 0x70;// Status
@@ -103,7 +103,7 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
     if(autoAck_enable > 0)
     {
     	en_aa_value = 0x3f;			// Enabled Auto Acknowledgment on pipe 0 e 1
-		setup_retr_value = 0x1A;	// Enabled retransmission (5 max with 500 us interval)
+		setup_retr_value = 0x15;	// Enabled retransmission (5 max with 500 us interval)
 		feature_value = 0x04;
 
     	// EN_AA register: Enable Auto Acknowledgment: Pipe 0
@@ -348,7 +348,7 @@ void RX_Mode(void)
 {
     //rx_newPayload = 0;
     //status = 0;
-	HAL_Delay(5);
+	//HAL_Delay(5);
     RX_OK = 0;
 
     uint8_t config_value = 0x1F;
@@ -359,6 +359,9 @@ void RX_Mode(void)
     //Make sure you sett CE = 0 first, so the chip is in Standby mode before you change radio mode. 
     //CE (active high and is used to activate the chip in RX or TX mode) - 0: Desativa o transceiver para programação
     HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET); 
+
+    // Added by Filipe
+    SPI_Write(FLUSH_RX, 0x00); //Limpar o buffer RX (os dados recebidos estão em rx_buf)
 
     //Configurar transceiver para recepção de dados  
     // CONFIG register (nRF24LE01):
@@ -374,6 +377,7 @@ void RX_Mode(void)
 
     //CE (active high and is used to activate the chip in RX or TX mode) - a: Ativa o transceiver para RX
     HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_SET); 
+    DWT_Delay_us(140); // 130 us STAND_BY -> RX Mode
   
 }
 
@@ -385,7 +389,7 @@ void RX_Mode(void)
 void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
 {
     
-	DWT_Delay_us(400); // Delay to give NRf time to transmit the ACK packet
+
     //HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
     // Read STATUS register
     status = SPI_Read_Status();
@@ -394,18 +398,29 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
 
     if(status & RX_DR)
     { 
+    	DWT_Delay_us(400); // Delay to give NRf time to transmit the ACK packet
+    	// Já que o flush do rx tenha ido pra depois do transmit, TALVEZ esse delay pode ser
+    	//  tirado. Entretanto é mais seguro com ele aqui pq talvez o processo de envio pro
+    	//  host seja mais rápido que o tempo de mandar o ack
         // if received data ready (RX_DR) interrupt
         RX_OK = 1;
+        HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
+
+        SPI_Read_Buf(R_RX_PAYLOAD, buf, PAYLOAD_WIDTH);  // read receive payload from RX_FIFO buffer
         *size = SPI_Read(R_RX_PLD_WIDTH);  // Retorna o número de bytes no payload recebido
-        SPI_Read_Buf(R_RX_PAYLOAD, buf, *size);  // read receive payload from RX_FIFO buffer
+        *newPayload = 1;
 
         if(*size > 32)  //Não pode conter mais que 32 bytes
         {
             *size = 0;
+            *newPayload = 0;
         }
-        SPI_Write(FLUSH_RX, 0x00); //Limpar o buffer RX (os dados recebidos estão em rx_buf).
+        //SPI_Write(FLUSH_RX, 0x00); //Limpar o buffer RX (os dados recebidos estão em rx_buf).
+        // Comando colocado dentro de RX_Mode
 
-        *newPayload = 1;
+
+        // COLOCAR RX_MODE AQUI?
+
     }
 
     
@@ -418,7 +433,7 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
         //RX_Mode();
         SPI_Write(FLUSH_TX,0); //limpar o buffer TX
         HAL_GPIO_TogglePin(LED_Port, LED_VERDE);
-
+        //RX_Mode();	// ISSO PODE FICAR EM OUTRO LUGAR? (Foi colocado em rf_sendBuffer)
     }
     
     // If the maximum number of retransmissions was reached
@@ -427,10 +442,10 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
     	//
     	SPI_Write(FLUSH_TX,0); //limpar o buffer TX
     	HAL_GPIO_TogglePin(LED_Port, LED_VERMELHO);
-
+    	//RX_Mode();	// ISSO PODE FICAR EM OUTRO LUGAR? (Foi colocado em rf_sendBuffer)
     }
 
-    RX_Mode();
+    //RX_Mode();
 
     //Reset status
     uint8_t sta_val = 0x70;
@@ -507,6 +522,9 @@ void TX_Mode(uint8_t* buf, uint8_t payloadLength)
 	            //                    + CRC (2 bytes) ==> Total 329 bits (pacote maximo) ==> ou seja 329useg
 	            //    adicionando os tempos de wakeup etc, teríamos +- 1mseg... vou usar 2mseg por segurança aqui...
 
+	  // CE precisa estar ativo durante 10 us para fazer a transmissão completa e todo o processo
+	  //  de auto ack até uma flag do STATUS ser acionada, inclusive caso o pacote seja perdido
+	  //  e tenham que ser feitas retransmissões
 	  DWT_Delay_us(15);
 	  HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
 }
