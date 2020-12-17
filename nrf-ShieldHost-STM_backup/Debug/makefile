@@ -19,6 +19,12 @@ RM := rm -rf
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(strip $(S_DEPS)),)
+-include $(S_DEPS)
+endif
+ifneq ($(strip $(S_UPPER_DEPS)),)
+-include $(S_UPPER_DEPS)
+endif
 ifneq ($(strip $(C_DEPS)),)
 -include $(C_DEPS)
 endif
@@ -26,26 +32,37 @@ endif
 
 -include ../makefile.defs
 
+BUILD_ARTIFACT_NAME := nrf-ShieldHost-STM_backup
+BUILD_ARTIFACT_EXTENSION := elf
+BUILD_ARTIFACT_PREFIX := 
+BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME).$(BUILD_ARTIFACT_EXTENSION)
+
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-nrf-ShieldHost-STM.elf \
+nrf-ShieldHost-STM_backup.elf \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-nrf-ShieldHost-STM.list \
+nrf-ShieldHost-STM_backup.list \
 
 OBJCOPY_HEX += \
-nrf-ShieldHost-STM.hex \
+nrf-ShieldHost-STM_backup.hex \
+
+OBJCOPY_BIN += \
+nrf-ShieldHost-STM_backup.bin \
 
 
 # All Target
-all: nrf-ShieldHost-STM.elf secondary-outputs
+all: main-build
+
+# Main-build Target
+main-build: nrf-ShieldHost-STM_backup.elf secondary-outputs
 
 # Tool invocations
-nrf-ShieldHost-STM.elf: $(OBJS) $(USER_OBJS) C:\Users\Filipe\ Augusto\STM32CubeIDE\workspace_1.1.0\nrf-ShieldHost-STM\STM32F103C8TX_FLASH.ld
-	arm-none-eabi-gcc -o "nrf-ShieldHost-STM.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Filipe Augusto\STM32CubeIDE\workspace_1.1.0\nrf-ShieldHost-STM\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="nrf-ShieldHost-STM.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+nrf-ShieldHost-STM_backup.elf: $(OBJS) $(USER_OBJS) C:\Users\Filipe\ Augusto\STM32CubeIDE\workspace_1.1.0\nrf-ShieldHost-STM_backup\STM32F103C8TX_FLASH.ld
+	arm-none-eabi-gcc -o "nrf-ShieldHost-STM_backup.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Filipe Augusto\STM32CubeIDE\workspace_1.1.0\nrf-ShieldHost-STM_backup\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="nrf-ShieldHost-STM_backup.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -54,13 +71,18 @@ default.size.stdout: $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-nrf-ShieldHost-STM.list: $(EXECUTABLES)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "nrf-ShieldHost-STM.list"
+nrf-ShieldHost-STM_backup.list: $(EXECUTABLES)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "nrf-ShieldHost-STM_backup.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-nrf-ShieldHost-STM.hex: $(EXECUTABLES)
-	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "nrf-ShieldHost-STM.hex"
+nrf-ShieldHost-STM_backup.hex: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "nrf-ShieldHost-STM_backup.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+nrf-ShieldHost-STM_backup.bin: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "nrf-ShieldHost-STM_backup.bin"
 	@echo 'Finished building: $@'
 	@echo ' '
 
@@ -69,9 +91,16 @@ clean:
 	-$(RM) *
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
-.PHONY: all clean dependents
+fail-specified-linker-script-missing:
+	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
+	@exit 2
+
+warn-no-linker-script-specified:
+	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
+
+.PHONY: all clean dependents fail-specified-linker-script-missing warn-no-linker-script-specified
 .SECONDARY:
 
 -include ../makefile.targets

@@ -4,7 +4,7 @@ main.c:215:13:MX_SPI1_Init	8	static
 main.c:253:13:MX_GPIO_Init	40	static
 main.c:326:6:IRQ_read	8	static
 main.c:340:6:rx_task	8	static
-main.c:370:6:get_Msg_fromHost	24	static
+main.c:370:6:get_Msg_fromHost	16	static
 main.c:453:6:tx_task	24	static
 main.c:502:6:rfSendBuffer	24	static
 main.c:521:6:waitForIRQ	8	static

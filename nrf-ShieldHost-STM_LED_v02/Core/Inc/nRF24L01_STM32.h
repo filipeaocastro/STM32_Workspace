@@ -111,7 +111,7 @@ static uint8_t tx_buf[PAYLOAD_WIDTH];
 static uint8_t status;     // Contains the STATUS register reading
 static uint8_t TX_OK = 0;  //Indicar MODO TX ativo (1) ou Inativo (0)
 static uint8_t RX_OK = 0;  //Indicar MODO RX ativo (1) ou Inativo (0)
-static uint8_t autoAck_enable = 0;
+static uint8_t autoAck_enable = 1;
 
 
 static void SPI_Write(uint8_t command, uint8_t * value);

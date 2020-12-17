@@ -913,7 +913,7 @@ void rx_task()
  8000628:	4806      	ldr	r0, [pc, #24]	; (8000644 <rx_task+0x44>)
  800062a:	f005 fe97 	bl	800635c <CDC_Transmit_FS>
           //DWT_Delay_us(400); // Delay to give NRf time to transmit the ACK packet
-          //HAL_Delay(2);
+          //HAL_Delay(5);
           RX_Mode();
  800062e:	f000 fb4f 	bl	8000cd0 <RX_Mode>
           apaga_led();
@@ -1730,7 +1730,7 @@ void init(uint8_t rf_channel, rf_data_rate_t rf_data_rate, rf_tx_power_t rf_pwr,
  8000a72:	46bd      	mov	sp, r7
  8000a74:	bd90      	pop	{r4, r7, pc}
  8000a76:	bf00      	nop
- 8000a78:	200002d6 	.word	0x200002d6
+ 8000a78:	20000009 	.word	0x20000009
  8000a7c:	200002d3 	.word	0x200002d3
  8000a80:	200002d4 	.word	0x200002d4
  8000a84:	200002d5 	.word	0x200002d5
@@ -2403,7 +2403,7 @@ void TX_Mode(uint8_t* buf, uint8_t payloadLength)
  8000e7a:	bf00      	nop
  8000e7c:	200002d4 	.word	0x200002d4
  8000e80:	40010c00 	.word	0x40010c00
- 8000e84:	200002d6 	.word	0x200002d6
+ 8000e84:	20000009 	.word	0x20000009
 
 08000e88 <HAL_MspInit>:
 /* USER CODE END 0 */
@@ -16058,7 +16058,7 @@ static void USBD_SetConfig(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
  8005e22:	3708      	adds	r7, #8
  8005e24:	46bd      	mov	sp, r7
  8005e26:	bd80      	pop	{r7, pc}
- 8005e28:	200002d7 	.word	0x200002d7
+ 8005e28:	200002d6 	.word	0x200002d6
 
 08005e2c <USBD_GetConfig>:
 * @param  pdev: device instance

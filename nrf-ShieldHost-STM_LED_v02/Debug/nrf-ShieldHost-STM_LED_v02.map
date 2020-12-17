@@ -241,7 +241,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 Core/Src/main.o
  .bss.TX_OK     0x0000000000000000        0x1 Core/Src/main.o
  .bss.RX_OK     0x0000000000000000        0x1 Core/Src/main.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 Core/Src/main.o
  .bss.cor_atual
                 0x0000000000000000        0x1 Core/Src/main.o
@@ -419,7 +419,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 Core/Src/stm32f1xx_hal_msp.o
  .bss.TX_OK     0x0000000000000000        0x1 Core/Src/stm32f1xx_hal_msp.o
  .bss.RX_OK     0x0000000000000000        0x1 Core/Src/stm32f1xx_hal_msp.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 Core/Src/stm32f1xx_hal_msp.o
  .bss.nRFint_guard
                 0x0000000000000000        0x1 Core/Src/stm32f1xx_hal_msp.o
@@ -512,7 +512,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 Core/Src/stm32f1xx_it.o
  .bss.TX_OK     0x0000000000000000        0x1 Core/Src/stm32f1xx_it.o
  .bss.RX_OK     0x0000000000000000        0x1 Core/Src/stm32f1xx_it.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 Core/Src/stm32f1xx_it.o
  .bss.nRFint_guard
                 0x0000000000000000        0x1 Core/Src/stm32f1xx_it.o
@@ -2719,7 +2719,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.o
  .bss.TX_OK     0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.o
  .bss.RX_OK     0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.o
  .bss.nRFint_guard
                 0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.o
@@ -2871,7 +2871,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.o
  .bss.TX_OK     0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.o
  .bss.RX_OK     0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.o
  .bss.nRFint_guard
                 0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.o
@@ -3037,7 +3037,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.o
  .bss.TX_OK     0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.o
  .bss.RX_OK     0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.o
  .bss.nRFint_guard
                 0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.o
@@ -3192,7 +3192,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.o
  .bss.TX_OK     0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.o
  .bss.RX_OK     0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.o
  .bss.nRFint_guard
                 0x0000000000000000        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.o
@@ -3350,7 +3350,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 USB_DEVICE/App/usb_device.o
  .bss.TX_OK     0x0000000000000000        0x1 USB_DEVICE/App/usb_device.o
  .bss.RX_OK     0x0000000000000000        0x1 USB_DEVICE/App/usb_device.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 USB_DEVICE/App/usb_device.o
  .bss.nRFint_guard
                 0x0000000000000000        0x1 USB_DEVICE/App/usb_device.o
@@ -3506,7 +3506,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 USB_DEVICE/App/usbd_cdc_if.o
  .bss.TX_OK     0x0000000000000000        0x1 USB_DEVICE/App/usbd_cdc_if.o
  .bss.RX_OK     0x0000000000000000        0x1 USB_DEVICE/App/usbd_cdc_if.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 USB_DEVICE/App/usbd_cdc_if.o
  .bss.nRFint_guard
                 0x0000000000000000        0x1 USB_DEVICE/App/usbd_cdc_if.o
@@ -3663,7 +3663,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 USB_DEVICE/App/usbd_desc.o
  .bss.TX_OK     0x0000000000000000        0x1 USB_DEVICE/App/usbd_desc.o
  .bss.RX_OK     0x0000000000000000        0x1 USB_DEVICE/App/usbd_desc.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 USB_DEVICE/App/usbd_desc.o
  .bss.nRFint_guard
                 0x0000000000000000        0x1 USB_DEVICE/App/usbd_desc.o
@@ -3818,7 +3818,7 @@ Discarded input sections
  .bss.status    0x0000000000000000        0x1 USB_DEVICE/Target/usbd_conf.o
  .bss.TX_OK     0x0000000000000000        0x1 USB_DEVICE/Target/usbd_conf.o
  .bss.RX_OK     0x0000000000000000        0x1 USB_DEVICE/Target/usbd_conf.o
- .bss.autoAck_enable
+ .data.autoAck_enable
                 0x0000000000000000        0x1 USB_DEVICE/Target/usbd_conf.o
  .bss.nRFint_guard
                 0x0000000000000000        0x1 USB_DEVICE/Target/usbd_conf.o
@@ -4722,7 +4722,9 @@ LOAD c:/st/stm32cubeide_1.1.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
  *fill*         0x0000000020000001        0x3 
  .data.ADDR_HOST_P0_AND_TX
                 0x0000000020000004        0x5 Core/Src/nRF24L01_STM32.o
- *fill*         0x0000000020000009        0x3 
+ .data.autoAck_enable
+                0x0000000020000009        0x1 Core/Src/nRF24L01_STM32.o
+ *fill*         0x000000002000000a        0x2 
  .data.SystemCoreClock
                 0x000000002000000c        0x4 Core/Src/system_stm32f1xx.o
                 0x000000002000000c                SystemCoreClock
@@ -4811,10 +4813,9 @@ LOAD c:/st/stm32cubeide_1.1.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
  .bss.status    0x00000000200002d3        0x1 Core/Src/nRF24L01_STM32.o
  .bss.TX_OK     0x00000000200002d4        0x1 Core/Src/nRF24L01_STM32.o
  .bss.RX_OK     0x00000000200002d5        0x1 Core/Src/nRF24L01_STM32.o
- .bss.autoAck_enable
-                0x00000000200002d6        0x1 Core/Src/nRF24L01_STM32.o
  .bss.cfgidx.7824
-                0x00000000200002d7        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.o
+                0x00000000200002d6        0x1 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.o
+ *fill*         0x00000000200002d7        0x1 
  .bss.mem.7892  0x00000000200002d8      0x220 USB_DEVICE/Target/usbd_conf.o
  *(COMMON)
  COMMON         0x00000000200004f8       0x16 Core/Src/ledControl.o

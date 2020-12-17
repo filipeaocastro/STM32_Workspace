@@ -80,7 +80,7 @@ uint8_t rf_tx_SendMsg = 0;
 uint8_t rfBridgeON = 0;				// Flag de ponte
 uint8_t rx_newData = 0;
 
-uint8_t autoAck_enabled = 1;	// Activates the Auto Acknowledgment function
+uint8_t autoAck_enabled = 0;	// Activates the Auto Acknowledgment function
 
 /* USER CODE END 0 */
 
@@ -351,7 +351,7 @@ void rx_task()
           //Enviar pacote recebido para o código do HOST (Visual Studio) via serial COMM (USB)
           acende_led(BLUE);
         	CDC_Transmit_FS(rx_buf, rx_payloadWidth);
-        	HAL_Delay(5);
+        	//HAL_Delay(5);
           apaga_led();
         }
 
@@ -427,14 +427,14 @@ void get_Msg_fromHost()
                   //Ecoar para o Host
 
                 	CDC_Transmit_FS(rf_tx_buffer, rf_tx_buffer_count);
-                	HAL_Delay(5);
+                	//HAL_Delay(5);
                   apaga_led();
-
+                  /*
                   for(int i = 0; i < 5; i++)
                   {
                     toggle_led(PURPLE);
                     HAL_Delay(60);
-                  }
+                  }*/
 
                   rfBridgeON = 1; //De agora em diante, todos os bytes recebidos do Host serão enviados ao MIP por RF.
                   //HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -473,7 +473,7 @@ void tx_task()
     {
       //Se existem menos de 32 bytes para serem enviados
       rfSendBuffer(&rf_tx_buffer[index_atual], (uint8_t)actual_length);
-      HAL_Delay(1); //Aguardar transmissão -- max 32 bytes
+      //HAL_Delay(1); //Aguardar transmissão -- max 32 bytes
       waitForIRQ();
       index_atual += actual_length;
     }

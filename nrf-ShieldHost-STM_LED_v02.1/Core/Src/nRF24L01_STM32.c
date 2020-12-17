@@ -348,7 +348,7 @@ void RX_Mode(void)
 {
     //rx_newPayload = 0;
     //status = 0;
-	HAL_Delay(5);
+	//HAL_Delay(5);
     RX_OK = 0;
 
     uint8_t config_value = 0x1F;
@@ -374,6 +374,7 @@ void RX_Mode(void)
 
     //CE (active high and is used to activate the chip in RX or TX mode) - a: Ativa o transceiver para RX
     HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_SET); 
+    DWT_Delay_us(140); // 130 us STAND_BY -> RX Mode
   
 }
 
@@ -385,7 +386,7 @@ void RX_Mode(void)
 void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
 {
     
-	DWT_Delay_us(400); // Delay to give NRf time to transmit the ACK packet
+
     //HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
     // Read STATUS register
     status = SPI_Read_Status();
@@ -394,6 +395,7 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
 
     if(status & RX_DR)
     { 
+    	DWT_Delay_us(400); // Delay to give NRf time to transmit the ACK packet
         // if received data ready (RX_DR) interrupt
         RX_OK = 1;
         *size = SPI_Read(R_RX_PLD_WIDTH);  // Retorna o número de bytes no payload recebido
@@ -418,6 +420,7 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
         //RX_Mode();
         SPI_Write(FLUSH_TX,0); //limpar o buffer TX
         HAL_GPIO_TogglePin(LED_Port, LED_VERDE);
+        RX_Mode();
 
     }
     
@@ -427,10 +430,11 @@ void RF_IRQ(uint8_t *buf, uint8_t *size, uint8_t *newPayload)
     	//
     	SPI_Write(FLUSH_TX,0); //limpar o buffer TX
     	HAL_GPIO_TogglePin(LED_Port, LED_VERMELHO);
+    	RX_Mode();
 
     }
 
-    RX_Mode();
+    //RX_Mode();
 
     //Reset status
     uint8_t sta_val = 0x70;
@@ -501,12 +505,12 @@ void TX_Mode(uint8_t* buf, uint8_t payloadLength)
 
 	  //Aguardar IRQ indicando que concluiu a transmissão..
 
-	  //HAL_Delay(1); //delay suficiente para transmitir o payload maximo de 32 bytes.
+	  HAL_Delay(1); //delay suficiente para transmitir o payload maximo de 32 bytes.
 	            //Com data rate de 1Mbps ==> 1us por bit;
 	            //Pacote transmitido: Preambulo (1 byte) + endereço (5bytes) + controle (9bits) + payload (até 32 bytes)
 	            //                    + CRC (2 bytes) ==> Total 329 bits (pacote maximo) ==> ou seja 329useg
 	            //    adicionando os tempos de wakeup etc, teríamos +- 1mseg... vou usar 2mseg por segurança aqui...
 
-	  DWT_Delay_us(15);
+	  //DWT_Delay_us(15);
 	  HAL_GPIO_WritePin(_RF_CE_GPIO_Port, _RF_CE_Pin, GPIO_PIN_RESET);
 }

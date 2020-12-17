@@ -353,7 +353,7 @@ void rx_task()
           acende_led(BLUE);
           CDC_Transmit_FS(rx_buf, rx_payloadWidth);
           //DWT_Delay_us(400); // Delay to give NRf time to transmit the ACK packet
-          //HAL_Delay(2);
+          //HAL_Delay(5);
           RX_Mode();
           apaga_led();
         }
